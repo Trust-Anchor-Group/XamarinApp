@@ -17,16 +17,16 @@ namespace XamarinApp.MainMenu.Contracts
 		private readonly Page owner;
 		private readonly LegalIdentity requestorIdentity;
 		private readonly Contract requestedContract;
-		private readonly string requestorBareJid;
+		private readonly string requestorFullJid;
 		private readonly string petitionId;
 		private readonly string purpose;
 
-		public PetitionContractPage(XmppConfiguration XmppConfiguration, Page Owner, LegalIdentity RequestorIdentity, string RequestorBareJid,
+		public PetitionContractPage(XmppConfiguration XmppConfiguration, Page Owner, LegalIdentity RequestorIdentity, string RequestorFullJid,
 			Contract RequestedContract, string PetitionId, string Purpose)
 		{
 			this.owner = Owner;
 			this.requestorIdentity = RequestorIdentity;
-			this.requestorBareJid = RequestorBareJid;
+			this.requestorFullJid = RequestorFullJid;
 			this.requestedContract = RequestedContract;
 			this.petitionId = PetitionId;
 			this.purpose = Purpose;
@@ -96,13 +96,13 @@ namespace XamarinApp.MainMenu.Contracts
 
 		private void AcceptButton_Clicked(object sender, EventArgs e)
 		{
-			App.Contracts.PetitionContractResponseAsync(this.requestedContract.ContractId, this.petitionId, this.requestorBareJid, true);
+			App.Contracts.PetitionContractResponseAsync(this.requestedContract.ContractId, this.petitionId, this.requestorFullJid, true);
 			App.ShowPage(this.owner, true);
 		}
 
 		private void DeclineButton_Clicked(object sender, EventArgs e)
 		{
-			App.Contracts.PetitionContractResponseAsync(this.requestedContract.ContractId, this.petitionId, this.requestorBareJid, false);
+			App.Contracts.PetitionContractResponseAsync(this.requestedContract.ContractId, this.petitionId, this.requestorFullJid, false);
 			App.ShowPage(this.owner, true);
 		}
 

@@ -21,6 +21,7 @@ using Waher.Security;
 using XamarinApp.Connection;
 using XamarinApp.MainMenu;
 using XamarinApp.MainMenu.Contracts;
+using System.Collections.Generic;
 
 namespace XamarinApp
 {
@@ -264,14 +265,16 @@ namespace XamarinApp
 		internal static XmppConfiguration Configuration => configuration;
 		internal static Page CurrentPage => instance.MainPage;
 
-		private void GetCustomKey(string FileName, out byte[] Key, out byte[] IV)
+		private async Task<KeyValuePair<byte[], byte[]>> GetCustomKey(string FileName)
 		{
+			byte[] Key;
+			byte[] IV;
 			string s;
 			int i;
 
 			try
 			{
-				s = SecureStorage.GetAsync(FileName).Result;
+				s = await SecureStorage.GetAsync(FileName);
 			}
 			catch (TypeInitializationException)
 			{
@@ -281,7 +284,7 @@ namespace XamarinApp
 				IV = Hashes.ComputeSHA256Hash(Encoding.UTF8.GetBytes(FileName + ".IV"));
 				Array.Resize<byte>(ref IV, 16);
 
-				return;
+				return new KeyValuePair<byte[], byte[]>(Key, IV);
 			}
 
 			if (!string.IsNullOrEmpty(s) && (i = s.IndexOf(',')) > 0)
@@ -301,8 +304,10 @@ namespace XamarinApp
 				}
 
 				s = Hashes.BinaryToString(Key) + "," + Hashes.BinaryToString(IV);
-				SecureStorage.SetAsync(FileName, s).Wait();
+				await SecureStorage.SetAsync(FileName, s);
 			}
+
+			return new KeyValuePair<byte[], byte[]>(Key, IV);
 		}
 
 		public static byte[] GetBytes(int NrBytes)
@@ -453,11 +458,12 @@ namespace XamarinApp
 				string.IsNullOrEmpty(configuration.HttpFileUploadJid) ||
 				!configuration.HttpFileUploadMaxSize.HasValue)
 			{
-				ManualResetEvent Done = new ManualResetEvent(false);
+				TaskCompletionSource<bool> Done = new TaskCompletionSource<bool>();
+
 				Task h(object sender, XmppState NewState)
 				{
 					if (NewState == XmppState.Connected || NewState == XmppState.Error)
-						Done.Set();
+						Done.TrySetResult(true);
 
 					return Task.CompletedTask;
 				}
@@ -467,9 +473,11 @@ namespace XamarinApp
 					App.Xmpp.OnStateChanged += h;
 
 					if (App.Xmpp.State == XmppState.Connected || App.Xmpp.State == XmppState.Error)
-						Done.Set();
+						Done.TrySetResult(true);
 
-					if (Done.WaitOne(10000))
+					Task _ = Task.Delay(10000).ContinueWith((T) => Done.TrySetResult(false));
+
+					if (await Done.Task)
 						return await FindServices(App.xmpp);
 					else
 						return false;
@@ -477,7 +485,6 @@ namespace XamarinApp
 				finally
 				{
 					App.Xmpp.OnStateChanged -= h;
-					Done.Dispose();
 				}
 			}
 			else
@@ -565,10 +572,13 @@ namespace XamarinApp
 			{
 				contracts = await ContractsClient.Create(xmpp, JID);
 				contracts.IdentityUpdated += Contracts_IdentityUpdated;
-				contracts.PetitionedIdentityReceived += Contracts_PetitionedIdentityReceived;
+				contracts.PetitionForIdentityReceived += Contracts_PetitionForIdentityReceived;
 				contracts.PetitionedIdentityResponseReceived += Contracts_PetitionedIdentityResponseReceived;
-				contracts.PetitionedContractReceived += Contracts_PetitionedContractReceived;
+				contracts.PetitionForContractReceived += Contracts_PetitionForContractReceived;
 				contracts.PetitionedContractResponseReceived += Contracts_PetitionedContractResponseReceived;
+
+				// TODO: Signature petitions
+				// TODO: Peer Review petitions
 			}
 		}
 
@@ -588,7 +598,7 @@ namespace XamarinApp
 			return Task.CompletedTask;
 		}
 
-		private static async Task Contracts_PetitionedContractReceived(object Sender, ContractPetitionEventArgs e)
+		private static async Task Contracts_PetitionForContractReceived(object Sender, ContractPetitionEventArgs e)
 		{
 			try
 			{
@@ -597,17 +607,17 @@ namespace XamarinApp
 				if (Contract.State == ContractState.Deleted ||
 					Contract.State == ContractState.Rejected)
 				{
-					await contracts.PetitionContractResponseAsync(e.RequestedContractId, e.PetitionId, e.RequestorBareJid, false);
+					await contracts.PetitionContractResponseAsync(e.RequestedContractId, e.PetitionId, e.RequestorFullJid, false);
 				}
 				else
 				{
-					ShowPage(new PetitionContractPage(configuration, instance.MainPage, e.RequestorIdentity, e.RequestorBareJid,
+					ShowPage(new PetitionContractPage(configuration, instance.MainPage, e.RequestorIdentity, e.RequestorFullJid,
 						Contract, e.PetitionId, e.Purpose), false);
 				}
 			}
 			catch (Exception)
 			{
-				await contracts.PetitionContractResponseAsync(e.RequestedContractId, e.PetitionId, e.RequestorBareJid, false);
+				await contracts.PetitionContractResponseAsync(e.RequestedContractId, e.PetitionId, e.RequestorFullJid, false);
 			}
 		}
 
@@ -621,7 +631,7 @@ namespace XamarinApp
 			return Task.CompletedTask;
 		}
 
-		private static async Task Contracts_PetitionedIdentityReceived(object Sender, LegalIdentityPetitionEventArgs e)
+		private static async Task Contracts_PetitionForIdentityReceived(object Sender, LegalIdentityPetitionEventArgs e)
 		{
 			try
 			{
@@ -635,17 +645,17 @@ namespace XamarinApp
 				if (Identity.State == IdentityState.Compromised ||
 					Identity.State == IdentityState.Rejected)
 				{
-					await contracts.PetitionIdentityResponseAsync(e.RequestedIdentityId, e.PetitionId, e.RequestorBareJid, false);
+					await contracts.PetitionIdentityResponseAsync(e.RequestedIdentityId, e.PetitionId, e.RequestorFullJid, false);
 				}
 				else
 				{
-					ShowPage(new PetitionIdentityPage(instance.MainPage, e.RequestorIdentity, e.RequestorBareJid,
+					ShowPage(new PetitionIdentityPage(instance.MainPage, e.RequestorIdentity, e.RequestorFullJid,
 						e.RequestedIdentityId, e.PetitionId, e.Purpose), false);
 				}
 			}
 			catch (Exception)
 			{
-				await contracts.PetitionIdentityResponseAsync(e.RequestedIdentityId, e.PetitionId, e.RequestorBareJid, false);
+				await contracts.PetitionIdentityResponseAsync(e.RequestedIdentityId, e.PetitionId, e.RequestorFullJid, false);
 			}
 		}
 
@@ -699,13 +709,14 @@ namespace XamarinApp
 				fileUpload?.Dispose();
 				fileUpload = null;
 
-				if (xmpp != null)
+				if (!(xmpp is null))
 				{
-					using (ManualResetEvent OfflineSent = new ManualResetEvent(false))
-					{
-						xmpp.SetPresence(Availability.Offline, (sender, e) => OfflineSent.Set());
-						OfflineSent.WaitOne(1000);
-					}
+					TaskCompletionSource<bool> OfflineSent = new TaskCompletionSource<bool>();
+
+					xmpp.SetPresence(Availability.Offline, (sender, e) => OfflineSent.TrySetResult(true));
+					Task _ = Task.Delay(1000).ContinueWith((T) => OfflineSent.TrySetResult(false));
+
+					await OfflineSent.Task;
 
 					xmpp.Dispose();
 					xmpp = null;
