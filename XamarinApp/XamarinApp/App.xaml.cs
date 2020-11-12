@@ -625,9 +625,8 @@ namespace XamarinApp
 
 		private static Task Contracts_PetitionForPeerReviewIDReceived(object Sender, SignaturePetitionEventArgs e)
 		{
-			// TODO: Display Peer Review form.
-
-			return contracts.PetitionSignatureResponseAsync(e.SignatoryIdentityId, e.ContentToSign, new byte[0], e.PetitionId, e.RequestorFullJid, false);
+			ShowPage(new MainMenu.IdentityPage(configuration, instance.MainPage, e.RequestorIdentity, e), false);
+			return Task.CompletedTask;
 		}
 
 		private static Task Contracts_PetitionedSignatureResponseReceived(object Sender, SignaturePetitionResponseEventArgs e)

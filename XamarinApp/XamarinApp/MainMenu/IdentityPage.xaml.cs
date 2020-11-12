@@ -7,6 +7,7 @@ using Waher.IoTGateway.Setup;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Persistence;
 using Waher.Runtime.Temporary;
+using System.Runtime.CompilerServices;
 
 namespace XamarinApp.MainMenu
 {
@@ -15,27 +16,35 @@ namespace XamarinApp.MainMenu
 	[DesignTimeVisible(true)]
 	public partial class IdentityPage : ContentPage, INotifyPropertyChanged, ILegalIdentityChanged, IBackButton
 	{
+		private readonly SignaturePetitionEventArgs review;
 		private readonly XmppConfiguration xmppConfiguration;
 		private readonly Page owner;
 		private readonly bool personal;
 		private LegalIdentity identity;
 
 		public IdentityPage(XmppConfiguration XmppConfiguration, Page Owner)
-			: this(XmppConfiguration, Owner, XmppConfiguration.LegalIdentity, true)
+			: this(XmppConfiguration, Owner, XmppConfiguration.LegalIdentity, true, null)
 		{
 		}
 
 		public IdentityPage(XmppConfiguration XmppConfiguration, Page Owner, LegalIdentity Identity)
-			: this(XmppConfiguration, Owner, Identity, XmppConfiguration.LegalIdentity.Id == Identity.Id)
+			: this(XmppConfiguration, Owner, Identity, XmppConfiguration.LegalIdentity.Id == Identity.Id, null)
 		{
 		}
 
-		private IdentityPage(XmppConfiguration XmppConfiguration, Page Owner, LegalIdentity Identity, bool Personal)
+		public IdentityPage(XmppConfiguration XmppConfiguration, Page Owner, LegalIdentity Identity, SignaturePetitionEventArgs Review)
+			: this(XmppConfiguration, Owner, Identity, XmppConfiguration.LegalIdentity.Id == Identity.Id, Review)
+		{
+		}
+
+		private IdentityPage(XmppConfiguration XmppConfiguration, Page Owner, LegalIdentity Identity, bool Personal, SignaturePetitionEventArgs Review)
 		{
 			this.xmppConfiguration = XmppConfiguration;
 			this.owner = Owner;
 			this.identity = Identity;
 			this.personal = Personal;
+			this.review = Review;
+
 			this.BindingContext = this;
 			InitializeComponent();
 
@@ -43,18 +52,17 @@ namespace XamarinApp.MainMenu
 			this.QrCode.Source = ImageSource.FromStream(() => new MemoryStream(Png));
 			this.QrCode.IsVisible = true;
 
-			this.CompromizedButton.IsVisible = Personal;
-			this.RevokeButton.IsVisible = Personal;
-
 			if (!Personal)
-			{
 				this.IdentitySection.Remove(this.NetworkView);
-				this.ButtonSection.Remove(this.CompromizedButtonView);
-				this.ButtonSection.Remove(this.RevokeButtonView);
-			}
 
 			this.LoadPhotos();
 		}
+
+		public bool ForReview => !(this.review is null);
+		public bool NotForReview => (this.review is null);
+		public bool IsPersonal => this.personal;
+		public bool NotPersonal => !this.personal;
+		public bool ForReviewAndPin => !(this.review is null) && xmppConfiguration.UsePin;
 
 		private async void LoadPhotos()
 		{
@@ -184,7 +192,7 @@ namespace XamarinApp.MainMenu
 
 				await Database.Update(this.xmppConfiguration);
 
-				await App.ShowPage();
+				this.BackClicked();
 			}
 			catch (Exception ex)
 			{
@@ -209,7 +217,7 @@ namespace XamarinApp.MainMenu
 
 				await Database.Update(this.xmppConfiguration);
 
-				await App.ShowPage();
+				this.BackClicked();
 			}
 			catch (Exception ex)
 			{
@@ -221,6 +229,78 @@ namespace XamarinApp.MainMenu
 		{
 			this.BackButton_Clicked(this, new EventArgs());
 			return true;
+		}
+
+		private async void ApproveReviewButton_Clicked(object sender, EventArgs e)
+		{
+			if (this.review is null)
+				return;
+
+			try
+			{
+				if ((!string.IsNullOrEmpty(this.FirstName) && !this.FirstNameCheck.IsChecked) ||
+					(!string.IsNullOrEmpty(this.MiddleNames) && !this.MiddleNameCheck.IsChecked) ||
+					(!string.IsNullOrEmpty(this.LastNames) && !this.LastNameCheck.IsChecked) ||
+					(!string.IsNullOrEmpty(this.PNr) && !this.PersonalNumberCheck.IsChecked) ||
+					(!string.IsNullOrEmpty(this.Address) && !this.AddressCheck.IsChecked) ||
+					(!string.IsNullOrEmpty(this.Address2) && !this.Address2Check.IsChecked) ||
+					(!string.IsNullOrEmpty(this.PostalCode) && !this.PostalCodeCheck.IsChecked) ||
+					(!string.IsNullOrEmpty(this.Area) && !this.AreaCheck.IsChecked) ||
+					(!string.IsNullOrEmpty(this.City) && !this.CityCheck.IsChecked) ||
+					(!string.IsNullOrEmpty(this.Region) && !this.RegionCheck.IsChecked) ||
+					(!string.IsNullOrEmpty(this.Country) && !this.CountryCheck.IsChecked))
+				{
+					await this.DisplayAlert("Incomplete", "Please review all information above, and check the corresponding check boxes if the information is correct. This must be done before you can approve the information.", "OK");
+					return;
+				}
+
+				if (!this.CarefulReviewCheck.IsChecked)
+				{
+					await this.DisplayAlert("Incomplete", "You need to check the box you have carefully reviewed all corresponding information above.", "OK");
+					return;
+				}
+
+				if (!this.ApprovePiiCheck.IsChecked)
+				{
+					await this.DisplayAlert("Incomplete", "You need to approve to associate your personal information with the identity you review. When third parties review the information in the identity, they will have access to the identity of the reviewers, for transparency.", "OK");
+					return;
+				}
+
+				if (this.xmppConfiguration.UsePin && this.xmppConfiguration.ComputePinHash(this.PIN.Text) != this.xmppConfiguration.PinHash)
+				{
+					await this.DisplayAlert("Error", "Invalid PIN.", "OK");
+					return;
+				}
+
+				byte[] Signature = await App.Contracts.SignAsync(this.review.ContentToSign);
+
+				await App.Contracts.PetitionSignatureResponseAsync(this.review.SignatoryIdentityId, this.review.ContentToSign, 
+					Signature, this.review.PetitionId, this.review.RequestorFullJid, true);
+
+				this.BackClicked();
+			}
+			catch (Exception ex)
+			{
+				await this.DisplayAlert("Error", ex.Message, "OK");
+			}
+		}
+
+		private async void RejectReviewButton_Clicked(object sender, EventArgs e)
+		{
+			if (this.review is null)
+				return;
+
+			try
+			{
+				await App.Contracts.PetitionSignatureResponseAsync(this.review.SignatoryIdentityId,
+					this.review.ContentToSign, new byte[0], this.review.PetitionId, this.review.RequestorFullJid, false);
+
+				this.BackClicked();
+			}
+			catch (Exception ex)
+			{
+				await this.DisplayAlert("Error", ex.Message, "OK");
+			}
 		}
 
 	}
