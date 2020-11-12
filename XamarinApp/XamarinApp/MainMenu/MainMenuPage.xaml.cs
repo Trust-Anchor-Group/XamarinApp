@@ -22,7 +22,7 @@ namespace XamarinApp.MainMenu
 
         private void ScanQR_Clicked(object sender, EventArgs e)
         {
-            App.ShowPage(new ScanQrCodePage(App.CurrentPage), false);
+            App.ShowPage(new ScanQrCodePage(App.CurrentPage, false), false);
         }
 
         private void Contracts_Clicked(object sender, EventArgs e)

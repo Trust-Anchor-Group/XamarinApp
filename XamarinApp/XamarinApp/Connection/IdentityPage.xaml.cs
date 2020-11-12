@@ -7,6 +7,7 @@ using Waher.IoTGateway.Setup;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Persistence;
 using Waher.Runtime.Temporary;
+using XamarinApp.MainMenu;
 
 namespace XamarinApp.Connection
 {
@@ -118,6 +119,7 @@ namespace XamarinApp.Connection
 		public string Region => this.xmppConfiguration.LegalIdentity["REGION"];
 		public string Country => this.xmppConfiguration.LegalIdentity["COUNTRY"];
 		public bool IsApproved => this.xmppConfiguration.LegalIdentity.State == IdentityState.Approved;
+		public bool IsCreated => this.xmppConfiguration.LegalIdentity.State == IdentityState.Created;
 
 		private static DateTime? CheckMin(DateTime? TP)
 		{
@@ -170,5 +172,28 @@ namespace XamarinApp.Connection
 			this.BackButton_Clicked(this, new EventArgs());
 			return true;
 		}
+
+		private async void InviteReviewerButton_Clicked(object sender, EventArgs e)
+		{
+			try
+			{
+				ScanQrCodePage Dialog = new ScanQrCodePage(this, true);
+				await this.Navigation.PushModalAsync(Dialog);
+				Uri Uri = new Uri(Dialog.Result);
+
+				if (Uri.Scheme.ToLower() != "iotid")
+					throw new Exception("Not a Legal Identity.");
+
+				await App.Contracts.PetitionPeerReviewIDAsync(Dialog.Result, this.xmppConfiguration.LegalIdentity,
+					Guid.NewGuid().ToString(), "Could you please review my identity information?");
+
+				await this.DisplayPromptAsync("Petition sent", "A petition has been sent to your peer.", "OK");
+			}
+			catch (Exception ex)
+			{
+				await this.DisplayAlert("Error", ex.Message, "OK");
+			}
+		}
+
 	}
 }

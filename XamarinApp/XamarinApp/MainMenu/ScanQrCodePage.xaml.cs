@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.Markup;
 using ZXing;
 
 namespace XamarinApp.MainMenu
@@ -12,17 +13,22 @@ namespace XamarinApp.MainMenu
 	public partial class ScanQrCodePage : ContentPage, IBackButton
 	{
 		private readonly Page owner;
+		private readonly bool modal;
 
-		public ScanQrCodePage(Page Owner)
+		public ScanQrCodePage(Page Owner, bool Modal)
 		{
 			this.owner = Owner;
+			this.modal = Modal;
 			this.BindingContext = this;
 			InitializeComponent();
 		}
 
 		private void BackButton_Clicked(object sender, EventArgs e)
 		{
-			App.ShowPage(this.owner, true);
+			if (this.modal)
+				this.Navigation.PopModalAsync();
+			else
+				App.ShowPage(this.owner, true);
 		}
 
 		private void ModeButton_Clicked(object sender, EventArgs e)
@@ -49,6 +55,8 @@ namespace XamarinApp.MainMenu
 				this.ManualButton.Focus();
 			});
 		}
+
+		public string Result => this.Link.Text;
 
 		private async void ManualButton_Clicked(object sender, EventArgs e)
 		{

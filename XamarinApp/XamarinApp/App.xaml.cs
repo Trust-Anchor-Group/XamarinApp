@@ -22,6 +22,7 @@ using XamarinApp.Connection;
 using XamarinApp.MainMenu;
 using XamarinApp.MainMenu.Contracts;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace XamarinApp
 {
@@ -572,14 +573,72 @@ namespace XamarinApp
 			{
 				contracts = await ContractsClient.Create(xmpp, JID);
 				contracts.IdentityUpdated += Contracts_IdentityUpdated;
+
 				contracts.PetitionForIdentityReceived += Contracts_PetitionForIdentityReceived;
 				contracts.PetitionedIdentityResponseReceived += Contracts_PetitionedIdentityResponseReceived;
+
 				contracts.PetitionForContractReceived += Contracts_PetitionForContractReceived;
 				contracts.PetitionedContractResponseReceived += Contracts_PetitionedContractResponseReceived;
 
-				// TODO: Signature petitions
-				// TODO: Peer Review petitions
+				contracts.PetitionForSignatureReceived += Contracts_PetitionForSignatureReceived;
+				contracts.PetitionedSignatureResponseReceived += Contracts_PetitionedSignatureResponseReceived;
+
+				contracts.PetitionForPeerReviewIDReceived += Contracts_PetitionForPeerReviewIDReceived;
+				contracts.PetitionedPeerReviewIDResponseReceived += Contracts_PetitionedPeerReviewIDResponseReceived;
 			}
+		}
+
+		private static async Task Contracts_PetitionedPeerReviewIDResponseReceived(object Sender, SignaturePetitionResponseEventArgs e)
+		{
+			try
+			{
+				if (!e.Response)
+				{
+					await instance.MainPage.DisplayAlert("Peer Review rejected",
+						"A peer you requested to review your application, has rejected to approve it.", "OK");
+				}
+				else
+				{
+					StringBuilder Xml = new StringBuilder();
+					configuration.LegalIdentity.Serialize(Xml, true, true, true, true, true, false, false);
+					byte[] Data = Encoding.UTF8.GetBytes(Xml.ToString());
+
+					bool? Result = contracts.ValidateSignature(e.RequestedIdentity, Data, e.Signature);
+					if (!Result.HasValue || !Result.Value)
+					{
+						await instance.MainPage.DisplayAlert("Peer Review rejected",
+							"A peer review you requested has been rejected, due to a signature error.", "OK");
+					}
+					else
+					{
+						await contracts.AddPeerReviewIDAttachment(configuration.LegalIdentity, e.RequestedIdentity, e.Signature);
+						await instance.MainPage.DisplayPromptAsync("Peer Review accepted",
+							"A peer review you requested has been accepted.", "OK");
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				await instance.MainPage.DisplayAlert("Error", ex.Message, "OK");
+			}
+		}
+
+		private static Task Contracts_PetitionForPeerReviewIDReceived(object Sender, SignaturePetitionEventArgs e)
+		{
+			// TODO: Display Peer Review form.
+
+			return contracts.PetitionSignatureResponseAsync(e.SignatoryIdentityId, e.ContentToSign, new byte[0], e.PetitionId, e.RequestorFullJid, false);
+		}
+
+		private static Task Contracts_PetitionedSignatureResponseReceived(object Sender, SignaturePetitionResponseEventArgs e)
+		{
+			return Task.CompletedTask;
+		}
+
+		private static Task Contracts_PetitionForSignatureReceived(object Sender, SignaturePetitionEventArgs e)
+		{
+			// Reject all signature requests by default:
+			return contracts.PetitionSignatureResponseAsync(e.SignatoryIdentityId, e.ContentToSign, new byte[0], e.PetitionId, e.RequestorFullJid, false);
 		}
 
 		internal static void AddFileUploadService(string JID, long? MaxFileSize)
