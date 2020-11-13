@@ -7,7 +7,6 @@ using Waher.IoTGateway.Setup;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Persistence;
 using Waher.Runtime.Temporary;
-using System.Runtime.CompilerServices;
 
 namespace XamarinApp.MainMenu
 {

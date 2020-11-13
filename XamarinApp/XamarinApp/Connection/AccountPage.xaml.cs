@@ -139,7 +139,6 @@ namespace XamarinApp.Connection
 			this.Connecting.IsVisible = true;
 			this.Connecting.IsRunning = true;
 
-			InMemorySniffer Sniffer = new InMemorySniffer(250);
 			bool Success = false;
 
 			try
@@ -147,7 +146,7 @@ namespace XamarinApp.Connection
 				(string HostName, int PortNumber) = await OperatorPage.GetXmppClientService(this.xmppConfiguration.Domain);
 
 				using (XmppClient Client = new XmppClient(HostName, PortNumber,
-					this.AccountName.Text, this.Password.Text, string.Empty, typeof(App).Assembly, Sniffer))
+					this.AccountName.Text, this.Password.Text, string.Empty, typeof(App).Assembly, App.Sniffer))
 				{
 					TaskCompletionSource<bool> Result = new TaskCompletionSource<bool>();
 					bool StreamNegotiation = false;
@@ -329,14 +328,12 @@ namespace XamarinApp.Connection
 			this.Connecting.IsVisible = true;
 			this.Connecting.IsRunning = true;
 
-			InMemorySniffer Sniffer = new InMemorySniffer(250);
-
 			try
 			{
 				(string HostName, int PortNumber) = await OperatorPage.GetXmppClientService(this.xmppConfiguration.Domain);
 
 				using (XmppClient Client = new XmppClient(HostName, PortNumber,
-					this.AccountName.Text, Password, string.Empty, typeof(App).Assembly, Sniffer))
+					this.AccountName.Text, Password, string.Empty, typeof(App).Assembly, App.Sniffer))
 				{
 					TaskCompletionSource<bool> Result = new TaskCompletionSource<bool>();
 					bool StreamNegotiation = false;

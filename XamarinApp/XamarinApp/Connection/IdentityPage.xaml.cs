@@ -8,6 +8,7 @@ using Waher.Networking.XMPP.Contracts;
 using Waher.Persistence;
 using Waher.Runtime.Temporary;
 using XamarinApp.MainMenu;
+using Waher.Events;
 
 namespace XamarinApp.Connection
 {
@@ -175,27 +176,32 @@ namespace XamarinApp.Connection
 
 		private async void InviteReviewerButton_Clicked(object sender, EventArgs e)
 		{
-			try
+			ScanQrCodePage Dialog = new ScanQrCodePage(this, true);
+			Dialog.CodeScanned += async (sender2, e2) =>
 			{
-				ScanQrCodePage Dialog = new ScanQrCodePage(this, true);
-				await this.Navigation.PushModalAsync(Dialog);
-				if (!string.IsNullOrEmpty(Dialog.Result))
+				try
 				{
-					Uri Uri = new Uri(Dialog.Result);
+					if (!string.IsNullOrEmpty(Dialog.Result))
+					{
+						string Code = Dialog.Result;
 
-					if (Uri.Scheme.ToLower() != "iotid")
-						throw new Exception("Not a Legal Identity.");
+						if (!Code.StartsWith("iotid:", StringComparison.InvariantCultureIgnoreCase))
+							throw new Exception("Not a Legal Identity.");
 
-					await App.Contracts.PetitionPeerReviewIDAsync(Dialog.Result, this.xmppConfiguration.LegalIdentity,
-						Guid.NewGuid().ToString(), "Could you please review my identity information?");
+						await App.Contracts.PetitionPeerReviewIDAsync(Code.Substring(6), this.xmppConfiguration.LegalIdentity,
+							Guid.NewGuid().ToString(), "Could you please review my identity information?");
 
-					await this.DisplayPromptAsync("Petition sent", "A petition has been sent to your peer.", "OK");
+						Device.BeginInvokeOnMainThread(() => 
+							this.DisplayAlert("Petition sent", "A petition has been sent to your peer.", "OK"));
+					}
 				}
-			}
-			catch (Exception ex)
-			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
-			}
+				catch (Exception ex)
+				{
+					Device.BeginInvokeOnMainThread(() => this.DisplayAlert("Error", ex.Message, "OK"));
+				}
+			};
+
+			await this.Navigation.PushModalAsync(Dialog);
 		}
 
 	}

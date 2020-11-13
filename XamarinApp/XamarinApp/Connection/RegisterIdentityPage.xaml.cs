@@ -200,6 +200,8 @@ namespace XamarinApp.Connection
 
 				if (!string.IsNullOrEmpty(s = this.DeviceID?.Trim()))
 					Properties.Add(new Property("DEVICE_ID", s));
+
+				Properties.Add(new Property("JID", App.Xmpp.BareJID));
 				
 				LegalIdentity Identity = await App.Contracts.ApplyAsync(Properties.ToArray());
 

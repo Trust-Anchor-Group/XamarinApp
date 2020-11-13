@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using Waher.Events;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Markup;
@@ -14,6 +15,7 @@ namespace XamarinApp.MainMenu
 	{
 		private readonly Page owner;
 		private readonly bool modal;
+		private string result = string.Empty;
 
 		public ScanQrCodePage(Page Owner, bool Modal)
 		{
@@ -46,10 +48,23 @@ namespace XamarinApp.MainMenu
 
 		public void Scanner_OnScanResult(Result result)
 		{
+			this.result = result.Text;
+
 			if (!(string.IsNullOrEmpty(result?.Text)))
 			{
 				if (this.modal)
+				{
+					try
+					{
+						CodeScanned?.Invoke(this, new EventArgs());
+					}
+					catch (Exception ex)
+					{
+						Log.Critical(ex);
+					}
+
 					this.BackClicked();
+				}
 				else
 				{
 					Device.BeginInvokeOnMainThread(() =>
@@ -64,7 +79,8 @@ namespace XamarinApp.MainMenu
 			}
 		}
 
-		public string Result => this.Link.Text;
+		public event EventHandler CodeScanned = null;
+		public string Result => this.result;
 
 		private async void OpenButton_Clicked(object sender, EventArgs e)
 		{

@@ -31,11 +31,11 @@ namespace XamarinApp
 	public partial class App : Application, IDisposable
 	{
 		private static readonly RandomNumberGenerator rnd = RandomNumberGenerator.Create();
+		private static readonly InMemorySniffer sniffer = new InMemorySniffer(250);
 		private static App instance = null;
 
 		private static Timer minuteTimer = null;
 		private static XmppClient xmpp = null;
-		private static InMemorySniffer sniffer = null;
 		private static ContractsClient contracts = null;
 		private static HttpFileUploadClient fileUpload = null;
 		private static XmppConfiguration configuration = null;
@@ -70,6 +70,8 @@ namespace XamarinApp
 			xmpp?.Dispose();
 			xmpp = null;
 		}
+
+		internal static InMemorySniffer Sniffer => sniffer;
 
 		protected override void OnStart()
 		{
@@ -399,8 +401,7 @@ namespace XamarinApp
 
 				(string HostName, int PortNumber) = await OperatorPage.GetXmppClientService(domainName);
 
-				sniffer = new InMemorySniffer(250);
-				xmpp = new XmppClient(HostName, PortNumber, accountName, passwordHash, passwordHashMethod, "en",
+				xmpp = new XmppClient(HostName, PortNumber, accountName, passwordHash, passwordHashMethod, "en", 
 					typeof(App).Assembly, sniffer)
 				{
 					TrustServer = false,
@@ -443,7 +444,7 @@ namespace XamarinApp
 							break;
 					}
 
-					if (instance.MainPage is IConnectionStateChanged ConnectionStateChanged)
+					if (instance?.MainPage is IConnectionStateChanged ConnectionStateChanged)
 						Device.BeginInvokeOnMainThread(() => ConnectionStateChanged.ConnectionStateChanged(NewState));
 
 					return Task.CompletedTask;
@@ -598,8 +599,8 @@ namespace XamarinApp
 			{
 				if (!e.Response)
 				{
-					await instance.MainPage.DisplayAlert("Peer Review rejected",
-						"A peer you requested to review your application, has rejected to approve it.", "OK");
+					Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Peer Review rejected",
+						"A peer you requested to review your application, has rejected it.", "OK"));
 				}
 				else
 				{
@@ -610,8 +611,8 @@ namespace XamarinApp
 					bool? Result = contracts.ValidateSignature(e.RequestedIdentity, Data, e.Signature);
 					if (!Result.HasValue || !Result.Value)
 					{
-						await instance.MainPage.DisplayAlert("Peer Review rejected",
-							"A peer review you requested has been rejected, due to a signature error.", "OK");
+						Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Peer Review rejected",
+							"A peer review you requested has been rejected, due to a signature error.", "OK"));
 					}
 					else
 					{
@@ -623,7 +624,7 @@ namespace XamarinApp
 			}
 			catch (Exception ex)
 			{
-				await instance.MainPage.DisplayAlert("Error", ex.Message, "OK");
+				Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Error", ex.Message, "OK"));
 			}
 		}
 
@@ -805,8 +806,10 @@ namespace XamarinApp
 			catch (Exception)
 			{
 				await App.Contracts.PetitionIdentityAsync(LegalId, Guid.NewGuid().ToString(), Purpose);
-				await instance.MainPage.DisplayAlert("Petition Sent", "A petition has been sent to the owner of the identity. " +
-					"If the owner accepts the petition, the identity information will be displayed on the screen.", "OK");
+
+				Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Petition Sent", 
+					"A petition has been sent to the owner of the identity. " +
+					"If the owner accepts the petition, the identity information will be displayed on the screen.", "OK"));
 			}
 		}
 
@@ -824,8 +827,10 @@ namespace XamarinApp
 			catch (Exception)
 			{
 				await App.Contracts.PetitionContractAsync(ContractId, Guid.NewGuid().ToString(), Purpose);
-				await instance.MainPage.DisplayAlert("Petition Sent", "A petition has been sent to the parts of the contract. " +
-					"If any of the parts accepts the petition, the contract information will be displayed on the screen.", "OK");
+
+				Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Petition Sent", 
+					"A petition has been sent to the parts of the contract. " +
+					"If any of the parts accepts the petition, the contract information will be displayed on the screen.", "OK"));
 			}
 		}
 
