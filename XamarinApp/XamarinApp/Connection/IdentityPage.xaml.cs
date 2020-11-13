@@ -179,15 +179,18 @@ namespace XamarinApp.Connection
 			{
 				ScanQrCodePage Dialog = new ScanQrCodePage(this, true);
 				await this.Navigation.PushModalAsync(Dialog);
-				Uri Uri = new Uri(Dialog.Result);
+				if (!string.IsNullOrEmpty(Dialog.Result))
+				{
+					Uri Uri = new Uri(Dialog.Result);
 
-				if (Uri.Scheme.ToLower() != "iotid")
-					throw new Exception("Not a Legal Identity.");
+					if (Uri.Scheme.ToLower() != "iotid")
+						throw new Exception("Not a Legal Identity.");
 
-				await App.Contracts.PetitionPeerReviewIDAsync(Dialog.Result, this.xmppConfiguration.LegalIdentity,
-					Guid.NewGuid().ToString(), "Could you please review my identity information?");
+					await App.Contracts.PetitionPeerReviewIDAsync(Dialog.Result, this.xmppConfiguration.LegalIdentity,
+						Guid.NewGuid().ToString(), "Could you please review my identity information?");
 
-				await this.DisplayPromptAsync("Petition sent", "A petition has been sent to your peer.", "OK");
+					await this.DisplayPromptAsync("Petition sent", "A petition has been sent to your peer.", "OK");
+				}
 			}
 			catch (Exception ex)
 			{

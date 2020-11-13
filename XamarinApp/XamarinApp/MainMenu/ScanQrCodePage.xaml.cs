@@ -46,19 +46,27 @@ namespace XamarinApp.MainMenu
 
 		public void Scanner_OnScanResult(Result result)
 		{
-			Device.BeginInvokeOnMainThread(() =>
+			if (!(string.IsNullOrEmpty(result?.Text)))
 			{
-				this.Link.Text = result.Text;
-				this.ScanGrid.IsVisible = false;
-				this.ManualGrid.IsVisible = true;
-				this.ModeButton.Text = "Scan Code";
-				this.ManualButton.Focus();
-			});
+				if (this.modal)
+					this.BackClicked();
+				else
+				{
+					Device.BeginInvokeOnMainThread(() =>
+					{
+						this.Link.Text = result.Text;
+						this.ScanGrid.IsVisible = false;
+						this.ManualGrid.IsVisible = true;
+						this.ModeButton.Text = "Scan Code";
+						this.OpenButton.Focus();
+					});
+				}
+			}
 		}
 
 		public string Result => this.Link.Text;
 
-		private async void ManualButton_Clicked(object sender, EventArgs e)
+		private async void OpenButton_Clicked(object sender, EventArgs e)
 		{
 			try
 			{
