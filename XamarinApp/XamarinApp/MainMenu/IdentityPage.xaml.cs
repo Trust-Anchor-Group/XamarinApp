@@ -55,6 +55,15 @@ namespace XamarinApp.MainMenu
 			if (!Personal)
 				this.IdentitySection.Remove(this.NetworkView);
 
+			if (this.review is null)
+			{
+				this.ButtonSection.Remove(this.CarefulReviewCell);
+				this.ButtonSection.Remove(this.ApprovePiiCell);
+				this.ButtonSection.Remove(this.PinCell);
+				this.ButtonSection.Remove(this.ApproveReviewCell);
+				this.ButtonSection.Remove(this.RejectReviewCell);
+			}
+
 			this.LoadPhotos();
 		}
 

@@ -126,28 +126,28 @@
                         </ViewCell>
                     </TableSection>
                     <TableSection x:Name="ButtonSection">
-                        <ViewCell>
+                        <ViewCell x:Name="CarefulReviewCell">
                             <StackLayout Orientation="Horizontal" IsVisible="{Binding ForReview}">
                                 <CheckBox x:Name="CarefulReviewCheck"/>
                                 <Label Text="I have carefully reviewed all information above, and find it to be a correct representation of the person requesting the review:" VerticalOptions="Center" />
                             </StackLayout>
                         </ViewCell>
-                        <ViewCell>
+                        <ViewCell x:Name="ApprovePiiCell">
                             <StackLayout Orientation="Horizontal" IsVisible="{Binding ForReview}">
                                 <CheckBox x:Name="ApprovePiiCheck"/>
                                 <Label Text="I approve of my personal information to be associated with the legal identity I am reviewing, for the purposes of transparency." VerticalOptions="Center" />
                             </StackLayout>
                         </ViewCell>
-                        <ViewCell>
+                        <ViewCell x:Name="PinCell">
                             <StackLayout Orientation="Horizontal" IsVisible="{Binding ForReviewAndPin}">
                                 <Label x:Name="PinLabel" Text="PIN:"/>
                                 <Entry x:Name="PIN" IsPassword="True"/>
                             </StackLayout>
                         </ViewCell>
-                        <ViewCell>
+                        <ViewCell x:Name="ApproveReviewCell">
                             <Button x:Name="ApproveReviewButton" Text="Approve Information" Clicked="ApproveReviewButton_Clicked" IsVisible="{Binding ForReview}"/>
                         </ViewCell>
-                        <ViewCell>
+                        <ViewCell x:Name="RejectReviewCell">
                             <Button x:Name="RejectReviewButton" Text="Reject Information" Clicked="RejectReviewButton_Clicked" IsVisible="{Binding ForReview}"/>
                         </ViewCell>
                         <ViewCell>
