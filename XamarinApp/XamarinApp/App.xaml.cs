@@ -605,7 +605,7 @@ namespace XamarinApp
 				else
 				{
 					StringBuilder Xml = new StringBuilder();
-					configuration.LegalIdentity.Serialize(Xml, true, true, true, true, true, false, false);
+					configuration.LegalIdentity.Serialize(Xml, true, true, true, true, true, true, true);
 					byte[] Data = Encoding.UTF8.GetBytes(Xml.ToString());
 
 					bool? Result = contracts.ValidateSignature(e.RequestedIdentity, Data, e.Signature);
