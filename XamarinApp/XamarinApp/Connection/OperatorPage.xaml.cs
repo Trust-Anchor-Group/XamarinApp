@@ -171,7 +171,7 @@ namespace XamarinApp.Connection
             {
                 (this.hostName, this.portNumber) = await GetXmppClientService(this.domainName);
 
-                InMemorySniffer Sniffer = new InMemorySniffer();
+                InMemorySniffer Sniffer = new InMemorySniffer(250);
 
                 using (XmppClient Client = new XmppClient(this.hostName, this.portNumber,
                     string.Empty, string.Empty, string.Empty, typeof(App).Assembly, Sniffer))

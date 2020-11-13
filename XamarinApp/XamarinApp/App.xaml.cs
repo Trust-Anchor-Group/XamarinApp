@@ -8,6 +8,7 @@ using Xamarin.Essentials;
 using Xamarin.Forms;
 using Waher.Events;
 using Waher.IoTGateway.Setup;
+using Waher.Networking.Sniffers;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Networking.XMPP.HttpFileUpload;
@@ -23,6 +24,7 @@ using XamarinApp.MainMenu;
 using XamarinApp.MainMenu.Contracts;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Xml;
 
 namespace XamarinApp
 {
@@ -33,6 +35,7 @@ namespace XamarinApp
 
 		private static Timer minuteTimer = null;
 		private static XmppClient xmpp = null;
+		private static InMemorySniffer sniffer = null;
 		private static ContractsClient contracts = null;
 		private static HttpFileUploadClient fileUpload = null;
 		private static XmppConfiguration configuration = null;
@@ -396,8 +399,9 @@ namespace XamarinApp
 
 				(string HostName, int PortNumber) = await OperatorPage.GetXmppClientService(domainName);
 
+				sniffer = new InMemorySniffer(250);
 				xmpp = new XmppClient(HostName, PortNumber, accountName, passwordHash, passwordHashMethod, "en",
-					typeof(App).Assembly)
+					typeof(App).Assembly, sniffer)
 				{
 					TrustServer = false,
 					AllowCramMD5 = false,
@@ -833,6 +837,74 @@ namespace XamarinApp
 				return false;
 		}
 
+		internal static string SnifferToText()
+		{
+			StringBuilder sb = new StringBuilder();
+
+			using (StringWriter Writer = new StringWriter(sb))
+			{
+				using (TextWriterSniffer Output = new TextWriterSniffer(Writer, BinaryPresentationMethod.ByteCount))
+				{
+					sniffer?.Replay(Output);
+				}
+			}
+
+			return sb.ToString();
+		}
+
+		internal static string SnifferToXml()
+		{
+			XmlWriterSettings Settings = new XmlWriterSettings()
+			{
+				Encoding = Encoding.UTF8,
+				Indent = true,
+				IndentChars = "\t",
+				NewLineChars = "\r\n",
+				NewLineHandling = NewLineHandling.Entitize,
+				NewLineOnAttributes = false
+			};
+
+			return SnifferToXml(Settings);
+		}
+
+		internal static string SnifferToXml(XmlWriterSettings Settings)
+		{
+			StringBuilder sb = new StringBuilder();
+
+			using (XmlWriter Writer = XmlWriter.Create(sb, Settings))
+			{
+				using (XmlWriterSniffer Output = new XmlWriterSniffer(Writer, BinaryPresentationMethod.ByteCount))
+				{
+					sniffer?.Replay(Output);
+				}
+			}
+
+			return sb.ToString();
+		}
+
+		internal static void SaveSnifferAsText(string FileName)
+		{
+			using (TextFileSniffer Output = new TextFileSniffer(FileName, BinaryPresentationMethod.ByteCount))
+			{
+				sniffer?.Replay(Output);
+			}
+		}
+
+		internal static void SaveSnifferAsXml(string FileName)
+		{
+			using (XmlFileSniffer Output = new XmlFileSniffer(FileName, BinaryPresentationMethod.ByteCount))
+			{
+				sniffer?.Replay(Output);
+			}
+		}
+
+		internal static void SaveSnifferAsXml(string FileName, string XslTransform)
+		{
+			using (XmlFileSniffer Output = new XmlFileSniffer(FileName, XslTransform, BinaryPresentationMethod.ByteCount))
+			{
+				sniffer?.Replay(Output);
+			}
+		}
 
 	}
 }

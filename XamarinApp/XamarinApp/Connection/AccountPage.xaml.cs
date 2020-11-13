@@ -139,7 +139,7 @@ namespace XamarinApp.Connection
 			this.Connecting.IsVisible = true;
 			this.Connecting.IsRunning = true;
 
-			InMemorySniffer Sniffer = new InMemorySniffer();
+			InMemorySniffer Sniffer = new InMemorySniffer(250);
 			bool Success = false;
 
 			try
@@ -329,7 +329,7 @@ namespace XamarinApp.Connection
 			this.Connecting.IsVisible = true;
 			this.Connecting.IsRunning = true;
 
-			InMemorySniffer Sniffer = new InMemorySniffer();
+			InMemorySniffer Sniffer = new InMemorySniffer(250);
 
 			try
 			{
