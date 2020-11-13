@@ -105,6 +105,7 @@ namespace XamarinApp.Connection
 			bool NotWorking = !Working;
 
 			this.RegisterButton.IsEnabled = NotWorking;
+			this.AddPhoto.IsEnabled = NotWorking;
 			this.FirstNameEntry.IsEnabled = NotWorking;
 			this.MiddleNamesEntry.IsEnabled = NotWorking;
 			this.LastNamesEntry.IsEnabled = NotWorking;
