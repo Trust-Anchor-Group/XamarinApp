@@ -52,7 +52,11 @@ namespace XamarinApp.MainMenu
 			this.QrCode.IsVisible = true;
 
 			if (!Personal)
+			{
 				this.IdentitySection.Remove(this.NetworkView);
+				this.ButtonSection.Remove(this.CompromizedCell);
+				this.ButtonSection.Remove(this.RevokeCell);
+			}
 
 			if (this.review is null)
 			{
@@ -67,6 +71,17 @@ namespace XamarinApp.MainMenu
 		}
 
 		public bool ForReview => !(this.review is null);
+		public bool ForReviewFirstName => this.ForReview && !string.IsNullOrEmpty(this.FirstName);
+		public bool ForReviewMiddleNames => this.ForReview && !string.IsNullOrEmpty(this.MiddleNames);
+		public bool ForReviewLastNames => this.ForReview && !string.IsNullOrEmpty(this.LastNames);
+		public bool ForReviewPNr => this.ForReview && !string.IsNullOrEmpty(this.PNr);
+		public bool ForReviewAddress => this.ForReview && !string.IsNullOrEmpty(this.Address);
+		public bool ForReviewAddress2 => this.ForReview && !string.IsNullOrEmpty(this.Address2);
+		public bool ForReviewPostalCode => this.ForReview && !string.IsNullOrEmpty(this.PostalCode);
+		public bool ForReviewArea => this.ForReview && !string.IsNullOrEmpty(this.Area);
+		public bool ForReviewCity => this.ForReview && !string.IsNullOrEmpty(this.City);
+		public bool ForReviewRegion => this.ForReview && !string.IsNullOrEmpty(this.Region);
+		public bool ForReviewCountry => this.ForReview && !string.IsNullOrEmpty(this.Country);
 		public bool NotForReview => (this.review is null);
 		public bool IsPersonal => this.personal;
 		public bool NotPersonal => !this.personal;

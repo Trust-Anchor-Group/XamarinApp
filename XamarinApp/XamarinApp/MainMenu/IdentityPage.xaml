@@ -32,77 +32,77 @@
                         </ViewCell>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <CheckBox x:Name="FirstNameCheck" IsVisible="{Binding ForReview}"/>
+                                <CheckBox x:Name="FirstNameCheck" IsVisible="{Binding ForReviewFirstName}"/>
                                 <Label Text="First Name:" VerticalOptions="Center"/>
                                 <Label Text="{Binding FirstName}" FontAttributes="Bold" VerticalOptions="Center"/>
                             </StackLayout>
                         </ViewCell>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <CheckBox x:Name="MiddleNameCheck" IsVisible="{Binding ForReview}"/>
+                                <CheckBox x:Name="MiddleNameCheck" IsVisible="{Binding ForReviewMiddleNames}"/>
                                 <Label Text="Middle Name(s):" VerticalOptions="Center" />
                                 <Label Text="{Binding MiddleNames}" FontAttributes="Bold" VerticalOptions="Center"/>
                             </StackLayout>
                         </ViewCell>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <CheckBox x:Name="LastNameCheck" IsVisible="{Binding ForReview}"/>
+                                <CheckBox x:Name="LastNameCheck" IsVisible="{Binding ForReviewLastNames}"/>
                                 <Label Text="Last Name(s):" VerticalOptions="Center" />
                                 <Label Text="{Binding LastNames}" FontAttributes="Bold" VerticalOptions="Center"/>
                             </StackLayout>
                         </ViewCell>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <CheckBox x:Name="PersonalNumberCheck" IsVisible="{Binding ForReview}"/>
+                                <CheckBox x:Name="PersonalNumberCheck" IsVisible="{Binding ForReviewPNr}"/>
                                 <Label Text="Personal Number:" VerticalOptions="Center" />
                                 <Label Text="{Binding PNr}" FontAttributes="Bold" VerticalOptions="Center"/>
                             </StackLayout>
                         </ViewCell>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <CheckBox x:Name="AddressCheck" IsVisible="{Binding ForReview}"/>
+                                <CheckBox x:Name="AddressCheck" IsVisible="{Binding ForReviewAddress}"/>
                                 <Label Text="Address:" VerticalOptions="Center" />
                                 <Label Text="{Binding Address}" FontAttributes="Bold" VerticalOptions="Center"/>
                             </StackLayout>
                         </ViewCell>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <CheckBox x:Name="Address2Check" IsVisible="{Binding ForReview}"/>
+                                <CheckBox x:Name="Address2Check" IsVisible="{Binding ForReviewAddress2}"/>
                                 <Label Text="Address (row 2):" VerticalOptions="Center" />
                                 <Label Text="{Binding Address2}" FontAttributes="Bold" VerticalOptions="Center"/>
                             </StackLayout>
                         </ViewCell>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <CheckBox x:Name="PostalCodeCheck" IsVisible="{Binding ForReview}"/>
+                                <CheckBox x:Name="PostalCodeCheck" IsVisible="{Binding ForReviewPostalCode}"/>
                                 <Label Text="ZIP or Postal Code:" VerticalOptions="Center" />
                                 <Label Text="{Binding PostalCode}" FontAttributes="Bold" VerticalOptions="Center"/>
                             </StackLayout>
                         </ViewCell>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <CheckBox x:Name="AreaCheck" IsVisible="{Binding ForReview}"/>
+                                <CheckBox x:Name="AreaCheck" IsVisible="{Binding ForReviewArea}"/>
                                 <Label Text="Area:" VerticalOptions="Center" />
                                 <Label Text="{Binding Area}" FontAttributes="Bold" VerticalOptions="Center"/>
                             </StackLayout>
                         </ViewCell>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <CheckBox x:Name="CityCheck" IsVisible="{Binding ForReview}"/>
+                                <CheckBox x:Name="CityCheck" IsVisible="{Binding ForReviewCity}"/>
                                 <Label Text="City:" VerticalOptions="Center" />
                                 <Label Text="{Binding City}" FontAttributes="Bold" VerticalOptions="Center"/>
                             </StackLayout>
                         </ViewCell>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <CheckBox x:Name="RegionCheck" IsVisible="{Binding ForReview}"/>
+                                <CheckBox x:Name="RegionCheck" IsVisible="{Binding ForReviewRegion}"/>
                                 <Label Text="Region or State:" VerticalOptions="Center" />
                                 <Label Text="{Binding Region}" FontAttributes="Bold" VerticalOptions="Center"/>
                             </StackLayout>
                         </ViewCell>
                         <ViewCell>
                             <StackLayout Orientation="Horizontal">
-                                <CheckBox x:Name="CountryCheck" IsVisible="{Binding ForReview}"/>
+                                <CheckBox x:Name="CountryCheck" IsVisible="{Binding ForReviewCountry}"/>
                                 <Label Text="Country:" VerticalOptions="Center" />
                                 <Label Text="{Binding Country}" FontAttributes="Bold" VerticalOptions="Center"/>
                             </StackLayout>
@@ -140,8 +140,8 @@
                         </ViewCell>
                         <ViewCell x:Name="PinCell">
                             <StackLayout Orientation="Horizontal" IsVisible="{Binding ForReviewAndPin}">
-                                <Label x:Name="PinLabel" Text="PIN:"/>
-                                <Entry x:Name="PIN" IsPassword="True"/>
+                                <Label x:Name="PinLabel" Text="PIN:" VerticalOptions="Center"/>
+                                <Entry x:Name="PIN" IsPassword="True" VerticalOptions="Center" WidthRequest="300" MinimumWidthRequest="150"/>
                             </StackLayout>
                         </ViewCell>
                         <ViewCell x:Name="ApproveReviewCell">
@@ -150,10 +150,10 @@
                         <ViewCell x:Name="RejectReviewCell">
                             <Button x:Name="RejectReviewButton" Text="Reject Information" Clicked="RejectReviewButton_Clicked" IsVisible="{Binding ForReview}"/>
                         </ViewCell>
-                        <ViewCell>
+                        <ViewCell x:Name="CompromizedCell">
                             <Button x:Name="CompromizedButton" Text="Report Compromized" Clicked="CompromizedButton_Clicked" IsVisible="{Binding IsPersonal}"/>
                         </ViewCell>
-                        <ViewCell>
+                        <ViewCell x:Name="RevokeCell">
                             <Button x:Name="RevokeButton" Text="Revoke" Clicked="RevokeButton_Clicked" IsVisible="{Binding IsPersonal}"/>
                         </ViewCell>
                         <ViewCell>
