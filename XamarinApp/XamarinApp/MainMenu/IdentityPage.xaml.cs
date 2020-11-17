@@ -219,7 +219,7 @@ namespace XamarinApp.MainMenu
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -244,7 +244,7 @@ namespace XamarinApp.MainMenu
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -273,25 +273,25 @@ namespace XamarinApp.MainMenu
 					(!string.IsNullOrEmpty(this.Region) && !this.RegionCheck.IsChecked) ||
 					(!string.IsNullOrEmpty(this.Country) && !this.CountryCheck.IsChecked))
 				{
-					await this.DisplayAlert("Incomplete", "Please review all information above, and check the corresponding check boxes if the information is correct. This must be done before you can approve the information.", "OK");
+					App.DisplayMessage("Incomplete", "Please review all information above, and check the corresponding check boxes if the information is correct. This must be done before you can approve the information.");
 					return;
 				}
 
 				if (!this.CarefulReviewCheck.IsChecked)
 				{
-					await this.DisplayAlert("Incomplete", "You need to check the box you have carefully reviewed all corresponding information above.", "OK");
+					App.DisplayMessage("Incomplete", "You need to check the box you have carefully reviewed all corresponding information above.");
 					return;
 				}
 
 				if (!this.ApprovePiiCheck.IsChecked)
 				{
-					await this.DisplayAlert("Incomplete", "You need to approve to associate your personal information with the identity you review. When third parties review the information in the identity, they will have access to the identity of the reviewers, for transparency.", "OK");
+					App.DisplayMessage("Incomplete", "You need to approve to associate your personal information with the identity you review. When third parties review the information in the identity, they will have access to the identity of the reviewers, for transparency.");
 					return;
 				}
 
 				if (this.xmppConfiguration.UsePin && this.xmppConfiguration.ComputePinHash(this.PIN.Text) != this.xmppConfiguration.PinHash)
 				{
-					await this.DisplayAlert("Error", "Invalid PIN.", "OK");
+					App.DisplayMessage("Error", "Invalid PIN.");
 					return;
 				}
 
@@ -304,7 +304,7 @@ namespace XamarinApp.MainMenu
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -322,7 +322,7 @@ namespace XamarinApp.MainMenu
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 

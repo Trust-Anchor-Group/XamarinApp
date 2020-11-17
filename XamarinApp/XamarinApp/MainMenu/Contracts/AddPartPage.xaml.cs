@@ -45,7 +45,7 @@ namespace XamarinApp.MainMenu.Contracts
 				this.Link.Focus();
 		}
 
-		public async void Scanner_OnScanResult(Result result)
+		public void Scanner_OnScanResult(Result result)
 		{
 			try
 			{
@@ -59,11 +59,11 @@ namespace XamarinApp.MainMenu.Contracts
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
-		private async void ManualButton_Clicked(object sender, EventArgs e)
+		private void ManualButton_Clicked(object sender, EventArgs e)
 		{
 			try
 			{
@@ -74,7 +74,7 @@ namespace XamarinApp.MainMenu.Contracts
 				{
 					if (Code.Substring(0, i).ToLower() != "iotid")
 					{
-						await this.DisplayAlert("Error", "Not a legal identity.", "OK");
+						App.DisplayMessage("Error", "Not a legal identity.");
 						return;
 					}
 
@@ -86,7 +86,7 @@ namespace XamarinApp.MainMenu.Contracts
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 

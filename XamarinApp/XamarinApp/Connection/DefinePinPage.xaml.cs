@@ -34,7 +34,7 @@ namespace XamarinApp.Connection
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Error", ex.Message, "OK");
+                App.DisplayMessage(ex);
             }
         }
 
@@ -54,18 +54,18 @@ namespace XamarinApp.Connection
             {
                 if (this.Pin.Text.Length < 8)
                 {
-                    await this.DisplayAlert("Error", "PIN number too short. At least 8 numbers (or characters) are required.", "OK");
-                    Device.BeginInvokeOnMainThread(() => this.Pin.Focus());
+                    this.Pin.Focus();
+                    App.DisplayMessage("Error", "PIN number too short. At least 8 numbers (or characters) are required.");
                 }
                 else if (this.Pin.Text.Trim() != this.Pin.Text)
                 {
-                    await this.DisplayAlert("Error", "PIN number must not unclude leading or trailing white-space.", "OK");
-                    Device.BeginInvokeOnMainThread(() => this.Pin.Focus());
+                    this.Pin.Focus();
+                    App.DisplayMessage("Error", "PIN number must not unclude leading or trailing white-space.");
                 }
                 else if (this.Pin.Text != this.RetypePin.Text)
                 {
-                    await this.DisplayAlert("Error", "PIN numbers (or passwords) do not match.", "OK");
-                    Device.BeginInvokeOnMainThread(() => this.Pin.Focus());
+                    this.Pin.Focus();
+                    App.DisplayMessage("Error", "PIN numbers (or passwords) do not match.");
                 }
                 else
                 {
@@ -82,7 +82,7 @@ namespace XamarinApp.Connection
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Error", ex.Message, "OK");
+                App.DisplayMessage(ex);
             }
         }
 
@@ -102,7 +102,7 @@ namespace XamarinApp.Connection
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Error", ex.Message, "OK");
+                App.DisplayMessage(ex);
             }
         }
 

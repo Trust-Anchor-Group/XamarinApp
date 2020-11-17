@@ -58,7 +58,7 @@ namespace XamarinApp.Connection
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -276,21 +276,21 @@ namespace XamarinApp.Connection
 					else
 					{
 						if (!StreamNegotiation || Timeout)
-							await this.DisplayAlert("Error", "Cannot connect to " + this.xmppConfiguration.Domain, "OK");
+							App.DisplayMessage("Error", "Cannot connect to " + this.xmppConfiguration.Domain);
 						else if (!StreamOpened)
-							await this.DisplayAlert("Error", this.xmppConfiguration.Domain + " is not a valid operator.", "OK");
+							App.DisplayMessage("Error", this.xmppConfiguration.Domain + " is not a valid operator.");
 						else if (!StartingEncryption)
-							await this.DisplayAlert("Error", this.xmppConfiguration.Domain + " does not follow the ubiquitous encryption policy.", "OK");
+							App.DisplayMessage("Error", this.xmppConfiguration.Domain + " does not follow the ubiquitous encryption policy.");
 						else if (!Authentication)
-							await this.DisplayAlert("Error", "Unable to authentication with " + this.xmppConfiguration.Domain + ".", "OK");
+							App.DisplayMessage("Error", "Unable to authentication with " + this.xmppConfiguration.Domain + ".");
 						else
-							await this.DisplayAlert("Error", "Invalid user name or password.", "OK");
+							App.DisplayMessage("Error", "Invalid user name or password.");
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", "Unable to connect to " + this.xmppConfiguration.Domain + ":\r\n\r\n" + ex.Message, "OK");
+				App.DisplayMessage("Error", "Unable to connect to " + this.xmppConfiguration.Domain + ":\r\n\r\n" + ex.Message);
 			}
 			finally
 			{
@@ -318,7 +318,7 @@ namespace XamarinApp.Connection
 				Password = Hashes.BinaryToString(App.GetBytes(16));
 			else if ((Password = this.Password.Text) != this.RetypePassword.Text)
 			{
-				await this.DisplayAlert("Error", "Passwords do not match.", "OK");
+				App.DisplayMessage("Error", "Passwords do not match.");
 				return;
 			}
 
@@ -417,30 +417,30 @@ namespace XamarinApp.Connection
 						await Database.Update(this.xmppConfiguration);
 
 						if (this.RandomPassword.On)
-							await this.DisplayAlert("Password", "The password for the connection is " + Password, "OK");
+							App.DisplayMessage("Password", "The password for the connection is " + Password);
 
 						await App.ShowPage();
 					}
 					else
 					{
 						if (!StreamNegotiation || Timeout)
-							await this.DisplayAlert("Error", "Cannot connect to " + this.xmppConfiguration.Domain, "OK");
+							App.DisplayMessage("Error", "Cannot connect to " + this.xmppConfiguration.Domain);
 						else if (!StreamOpened)
-							await this.DisplayAlert("Error", this.xmppConfiguration.Domain + " is not a valid operator.", "OK");
+							App.DisplayMessage("Error", this.xmppConfiguration.Domain + " is not a valid operator.");
 						else if (!StartingEncryption)
-							await this.DisplayAlert("Error", this.xmppConfiguration.Domain + " does not follow the ubiquitous encryption policy.", "OK");
+							App.DisplayMessage("Error", this.xmppConfiguration.Domain + " does not follow the ubiquitous encryption policy.");
 						else if (!Authentication)
-							await this.DisplayAlert("Error", "Unable to authentication with " + this.xmppConfiguration.Domain + ".", "OK");
+							App.DisplayMessage("Error", "Unable to authentication with " + this.xmppConfiguration.Domain + ".");
 						else if (!Registering)
-							await this.DisplayAlert("Error", "The operator " + this.xmppConfiguration.Domain + " does not support registration of new accounts.", "OK");
+							App.DisplayMessage("Error", "The operator " + this.xmppConfiguration.Domain + " does not support registration of new accounts.");
 						else
-							await this.DisplayAlert("Error", "Account name already taken. Choose another.", "OK");
+							App.DisplayMessage("Error", "Account name already taken. Choose another.");
 					}
 				}
 			}
 			catch (Exception)
 			{
-				await this.DisplayAlert("Error", "Unable to connect to " + this.xmppConfiguration.Domain, "OK");
+				App.DisplayMessage("Error", "Unable to connect to " + this.xmppConfiguration.Domain);
 			}
 			finally
 			{

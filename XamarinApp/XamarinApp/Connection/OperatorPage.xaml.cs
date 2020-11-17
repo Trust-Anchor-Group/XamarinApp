@@ -244,19 +244,19 @@ namespace XamarinApp.Connection
                     else
                     {
                         if (!StreamNegotiation || Timeout)
-                            await this.DisplayAlert("Error", "Cannot connect to " + this.domainName, "OK");
+                            App.DisplayMessage("Error", "Cannot connect to " + this.domainName);
                         else if (!StreamOpened)
-                            await this.DisplayAlert("Error", this.domainName + " is not a valid operator.", "OK");
+                            App.DisplayMessage("Error", this.domainName + " is not a valid operator.");
                         else if (!StartingEncryption)
-                            await this.DisplayAlert("Error", this.domainName + " does not follow the ubiquitous encryption policy.", "OK");
+                            App.DisplayMessage("Error", this.domainName + " does not follow the ubiquitous encryption policy.");
                         else
-                            await this.DisplayAlert("Error", "Unable to connect to " + this.domainName, "OK");
+                            App.DisplayMessage("Error", "Unable to connect to " + this.domainName);
                     }
                 }
             }
             catch (Exception)
             {
-                await this.DisplayAlert("Error", "Unable to connect to " + this.domainName, "OK");
+                App.DisplayMessage("Error", "Unable to connect to " + this.domainName);
             }
             finally
             {

@@ -225,7 +225,7 @@ namespace XamarinApp.MainMenu.Contracts
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -245,7 +245,7 @@ namespace XamarinApp.MainMenu.Contracts
 			catch (Exception ex)
 			{
 				this.template = null;
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -450,13 +450,13 @@ namespace XamarinApp.MainMenu.Contracts
 							{
 								if (Nr < Min)
 								{
-									await this.DisplayAlert("Error", "The contract requires at least " + Min.ToString() + " part(s) of role " + Role + ". Add more parts to the contract and try again.", "OK");
+									App.DisplayMessage("Error", "The contract requires at least " + Min.ToString() + " part(s) of role " + Role + ". Add more parts to the contract and try again.");
 									return;
 								}
 
 								if (Nr > Min)
 								{
-									await this.DisplayAlert("Error", "The contract requires at most " + Max.ToString() + " part(s) of role " + Role + ". Remove some of the parts from the contract and try again.", "OK");
+									App.DisplayMessage("Error", "The contract requires at most " + Max.ToString() + " part(s) of role " + Role + ". Remove some of the parts from the contract and try again.");
 									return;
 								}
 
@@ -484,7 +484,7 @@ namespace XamarinApp.MainMenu.Contracts
 						if (Entry.BackgroundColor == Color.Salmon)
 						{
 							Entry.Focus();
-							await this.DisplayAlert("Error", "Your contract contains errors. Fix these errors and try again.", "OK");
+							App.DisplayMessage("Error", "Your contract contains errors. Fix these errors and try again.");
 							return;
 						}
 					}
@@ -512,20 +512,20 @@ namespace XamarinApp.MainMenu.Contracts
 
 					default:
 						this.VisibilityPicker.Focus();
-						await this.DisplayAlert("Error", "Select contract visibility first, and then try again.", "OK");
+						App.DisplayMessage("Error", "Select contract visibility first, and then try again.");
 						return;
 				}
 
 				if (string.IsNullOrEmpty(this.role))
 				{
 					this.RolePicker.Focus();
-					await this.DisplayAlert("Error", "Select contract role first, and then try again.", "OK");
+					App.DisplayMessage("Error", "Select contract role first, and then try again.");
 					return;
 				}
 
 				if (this.xmppConfiguration.UsePin && this.xmppConfiguration.ComputePinHash(this.PIN.Text) != this.xmppConfiguration.PinHash)
 				{
-					await this.DisplayAlert("Error", "Invalid PIN.", "OK");
+					App.DisplayMessage("Error", "Invalid PIN.");
 					return;
 				}
 
@@ -537,7 +537,7 @@ namespace XamarinApp.MainMenu.Contracts
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 			finally
 			{

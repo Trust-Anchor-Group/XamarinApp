@@ -109,13 +109,13 @@ namespace XamarinApp.MainMenu
 
 					default:
 						if (!await Launcher.TryOpenAsync(Uri))
-							await this.DisplayAlert("Error", "Code not understood:\r\n\r\n" + Code, "OK");
+							App.DisplayMessage("Error", "Code not understood:\r\n\r\n" + Code);
 						break;
 				}
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 

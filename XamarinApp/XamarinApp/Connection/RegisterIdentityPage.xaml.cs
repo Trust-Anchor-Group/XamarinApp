@@ -41,7 +41,7 @@ namespace XamarinApp.Connection
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -125,28 +125,28 @@ namespace XamarinApp.Connection
 		{
 			if (!App.Online)
 			{
-				await DisplayAlert("Error", "Not connected to the operator.", "OK");
+				App.DisplayMessage("Error", "Not connected to the operator.");
 				return;
 			}
 
 			if (string.IsNullOrEmpty(this.FirstNameEntry.Text.Trim()))
 			{
-				await DisplayAlert("Error", "You need to provide a first name.", "OK");
 				this.FirstNameEntry.Focus();
+				App.DisplayMessage("Error", "You need to provide a first name.");
 				return;
 			}
 
 			if (string.IsNullOrEmpty(this.LastNamesEntry.Text.Trim()))
 			{
-				await DisplayAlert("Error", "You need to provide at least one last name.", "OK");
 				this.LastNamesEntry.Focus();
+				App.DisplayMessage("Error", "You need to provide at least one last name.");
 				return;
 			}
 
 			if (string.IsNullOrEmpty(this.PNrEntry.Text.Trim()))
 			{
-				await DisplayAlert("Error", "You need to provide a personal or social security number.", "OK");
 				this.PNrEntry.Focus();
+				App.DisplayMessage("Error", "You need to provide a personal or social security number.");
 				return;
 			}
 
@@ -158,7 +158,7 @@ namespace XamarinApp.Connection
 
 				if (string.IsNullOrEmpty(this.xmppConfiguration.LegalJid))
 				{
-					await DisplayAlert("Error", "Operator does not support legal identities and smart contracts.", "OK");
+					App.DisplayMessage("Error", "Operator does not support legal identities and smart contracts.");
 					return;
 				}
 
@@ -210,7 +210,7 @@ namespace XamarinApp.Connection
 					HttpFileUploadEventArgs e2 = await App.FileUpload.RequestUploadSlotAsync(Path.GetFileName(P.Item1), P.Item2, P.Item3.Length);
 					if (!e2.Ok)
 					{
-						await this.DisplayAlert("Error", "Unable to upload photo: " + e2.ErrorText, "OK");
+						App.DisplayMessage("Error", "Unable to upload photo: " + e2.ErrorText);
 						return;
 					}
 
@@ -231,8 +231,7 @@ namespace XamarinApp.Connection
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", "Unable to register information with " + this.xmppConfiguration.Domain +
-					":\r\n\r\n" + ex.Message, "OK");
+				App.DisplayMessage("Error", "Unable to register information with " + this.xmppConfiguration.Domain + ":\r\n\r\n" + ex.Message);
 			}
 			finally
 			{
@@ -310,7 +309,7 @@ namespace XamarinApp.Connection
 			if (Bin.Length > xmppConfiguration.HttpFileUploadMaxSize.Value)
 			{
 				ms.Dispose();
-				await this.DisplayAlert("Error", "Photo too large.", "OK");
+				App.DisplayMessage("Error", "Photo too large.");
 				return;
 			}
 

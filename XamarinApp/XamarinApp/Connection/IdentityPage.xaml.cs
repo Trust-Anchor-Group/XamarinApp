@@ -97,7 +97,7 @@ namespace XamarinApp.Connection
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -141,7 +141,7 @@ namespace XamarinApp.Connection
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -194,13 +194,12 @@ namespace XamarinApp.Connection
 						await App.Contracts.PetitionPeerReviewIDAsync(Code.Substring(6), this.xmppConfiguration.LegalIdentity,
 							Guid.NewGuid().ToString(), "Could you please review my identity information?");
 
-						Device.BeginInvokeOnMainThread(() => 
-							this.DisplayAlert("Petition sent", "A petition has been sent to your peer.", "OK"));
+						App.DisplayMessage("Petition sent", "A petition has been sent to your peer.");
 					}
 				}
 				catch (Exception ex)
 				{
-					Device.BeginInvokeOnMainThread(() => this.DisplayAlert("Error", ex.Message, "OK"));
+					App.DisplayMessage(ex);
 				}
 			};
 

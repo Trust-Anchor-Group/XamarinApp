@@ -285,14 +285,14 @@ namespace XamarinApp.MainMenu.Contracts
 				{
 					Contract Contract = await App.Contracts.SignContractAsync(this.contract, Button.StyleId, false);
 
-					await this.DisplayAlert("Message", "Contract successfully signed.", "OK");
+					App.DisplayMessage("Message", "Contract successfully signed.");
 
 					App.ShowPage(new ViewContractPage(this.xmppConfiguration, this.owner, Contract, false), true);
 				}
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -305,7 +305,7 @@ namespace XamarinApp.MainMenu.Contracts
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -332,11 +332,11 @@ namespace XamarinApp.MainMenu.Contracts
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
-		private async void ShowServerSignature(object Sender, EventArgs e)
+		private void ShowServerSignature(object Sender, EventArgs e)
 		{
 			try
 			{
@@ -345,7 +345,7 @@ namespace XamarinApp.MainMenu.Contracts
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -426,13 +426,13 @@ namespace XamarinApp.MainMenu.Contracts
 			{
 				Contract Contract = await App.Contracts.ObsoleteContractAsync(this.contract.ContractId);
 
-				await this.DisplayAlert("Message", "Contract has been obsoleted.", "OK");
+				App.DisplayMessage("Message", "Contract has been obsoleted.");
 
 				App.ShowPage(new ViewContractPage(this.xmppConfiguration, this.owner, Contract, false), true);
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -442,13 +442,13 @@ namespace XamarinApp.MainMenu.Contracts
 			{
 				Contract Contract = await App.Contracts.DeleteContractAsync(this.contract.ContractId);
 
-				await this.DisplayAlert("Message", "Contract has been deleted.", "OK");
+				App.DisplayMessage("Message", "Contract has been deleted.");
 
 				App.ShowPage(new ViewContractPage(this.xmppConfiguration, this.owner, Contract, false), true);
 			}
 			catch (Exception ex)
 			{
-				await this.DisplayAlert("Error", ex.Message, "OK");
+				App.DisplayMessage(ex);
 			}
 		}
 

@@ -18,12 +18,12 @@ using Waher.Persistence;
 using Waher.Persistence.Files;
 using Waher.Persistence.Serialization;
 using Waher.Runtime.Inventory;
+using Waher.Runtime.Queue;
 using Waher.Security;
 using XamarinApp.Connection;
 using XamarinApp.MainMenu;
 using XamarinApp.MainMenu.Contracts;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Xml;
 
 namespace XamarinApp
@@ -401,7 +401,7 @@ namespace XamarinApp
 
 				(string HostName, int PortNumber) = await OperatorPage.GetXmppClientService(domainName);
 
-				xmpp = new XmppClient(HostName, PortNumber, accountName, passwordHash, passwordHashMethod, "en", 
+				xmpp = new XmppClient(HostName, PortNumber, accountName, passwordHash, passwordHashMethod, "en",
 					typeof(App).Assembly, sniffer)
 				{
 					TrustServer = false,
@@ -598,10 +598,7 @@ namespace XamarinApp
 			try
 			{
 				if (!e.Response)
-				{
-					Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Peer Review rejected",
-						"A peer you requested to review your application, has rejected it.", "OK"));
-				}
+					App.DisplayMessage("Peer Review rejected", "A peer you requested to review your application, has rejected it.");
 				else
 				{
 					StringBuilder Xml = new StringBuilder();
@@ -610,21 +607,17 @@ namespace XamarinApp
 
 					bool? Result = contracts.ValidateSignature(e.RequestedIdentity, Data, e.Signature);
 					if (!Result.HasValue || !Result.Value)
-					{
-						Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Peer Review rejected",
-							"A peer review you requested has been rejected, due to a signature error.", "OK"));
-					}
+						App.DisplayMessage("Peer Review rejected", "A peer review you requested has been rejected, due to a signature error.");
 					else
 					{
 						await contracts.AddPeerReviewIDAttachment(configuration.LegalIdentity, e.RequestedIdentity, e.Signature);
-						await instance.MainPage.DisplayPromptAsync("Peer Review accepted",
-							"A peer review you requested has been accepted.", "OK");
+						App.DisplayMessage("Peer Review accepted", "A peer review you requested has been accepted.");
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Error", ex.Message, "OK"));
+				App.DisplayMessage(ex);
 			}
 		}
 
@@ -654,7 +647,7 @@ namespace XamarinApp
 		private static Task Contracts_PetitionedContractResponseReceived(object Sender, ContractPetitionResponseEventArgs e)
 		{
 			if (!e.Response || e.RequestedContract is null)
-				Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Message", "Petition to view contract was denied.", "OK"));
+				App.DisplayMessage("Message", "Petition to view contract was denied.");
 			else
 				ShowPage(new ViewContractPage(configuration, instance.MainPage, e.RequestedContract, false), false);
 
@@ -687,7 +680,7 @@ namespace XamarinApp
 		private static Task Contracts_PetitionedIdentityResponseReceived(object Sender, LegalIdentityPetitionResponseEventArgs e)
 		{
 			if (!e.Response || e.RequestedIdentity is null)
-				Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Message", "Petition to view legal identity was denied.", "OK"));
+				App.DisplayMessage("Message", "Petition to view legal identity was denied.");
 			else
 				ShowPage(new MainMenu.IdentityPage(configuration, instance.MainPage, e.RequestedIdentity), false);
 
@@ -807,9 +800,8 @@ namespace XamarinApp
 			{
 				await App.Contracts.PetitionIdentityAsync(LegalId, Guid.NewGuid().ToString(), Purpose);
 
-				Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Petition Sent", 
-					"A petition has been sent to the owner of the identity. " +
-					"If the owner accepts the petition, the identity information will be displayed on the screen.", "OK"));
+				App.DisplayMessage("Petition Sent", "A petition has been sent to the owner of the identity. " +
+					"If the owner accepts the petition, the identity information will be displayed on the screen.");
 			}
 		}
 
@@ -828,9 +820,8 @@ namespace XamarinApp
 			{
 				await App.Contracts.PetitionContractAsync(ContractId, Guid.NewGuid().ToString(), Purpose);
 
-				Device.BeginInvokeOnMainThread(() => instance.MainPage.DisplayAlert("Petition Sent", 
-					"A petition has been sent to the parts of the contract. " +
-					"If any of the parts accepts the petition, the contract information will be displayed on the screen.", "OK"));
+				App.DisplayMessage("Petition Sent", "A petition has been sent to the parts of the contract. " +
+					"If any of the parts accepts the petition, the contract information will be displayed on the screen.");
 			}
 		}
 
@@ -909,6 +900,60 @@ namespace XamarinApp
 			{
 				sniffer?.Replay(Output);
 			}
+		}
+
+		internal static void DisplayMessage(string Header, string Message)
+		{
+			messageQueue.Add(new MessageRec()
+			{
+				Header = Header,
+				Message = Message
+			});
+
+			if (!displayingMessages)
+				Device.BeginInvokeOnMainThread(async () => await DisplayMessages());
+		}
+
+		internal static void DisplayMessage(Exception Exception)
+		{
+			Exception = Log.UnnestException(Exception);
+
+			if (Exception is AggregateException AggregateException)
+			{
+				foreach (Exception Exception2 in AggregateException.InnerExceptions)
+					DisplayMessage(Exception2);
+			}
+			else
+				DisplayMessage("Error", Exception.Message);
+		}
+
+		private static async Task DisplayMessages()
+		{
+			MessageRec Rec;
+
+			displayingMessages = true;
+			try
+			{
+				do
+				{
+					Rec = await messageQueue.Wait();
+					await instance.MainPage.DisplayAlert(Rec.Header, Rec.Message, "OK");
+				}
+				while (messageQueue.CountItems > 0);
+			}
+			finally
+			{
+				displayingMessages = false;
+			}
+		}
+
+		private static readonly AsyncQueue<MessageRec> messageQueue = new AsyncQueue<MessageRec>();
+		private static bool displayingMessages = false;
+
+		private class MessageRec
+		{
+			public string Header;
+			public string Message;
 		}
 
 	}
