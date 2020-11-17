@@ -111,7 +111,7 @@
                         </ViewCell>
                     </TableSection>
                     <TableSection x:Name="ButtonSection">
-                        <ViewCell>
+                        <ViewCell x:Name="InviteReviewerCell">
                             <Button x:Name="InviteReviewerButton" Text="Invite peer to review" Clicked="InviteReviewerButton_Clicked" IsVisible="{Binding IsCreated}" IsEnabled="{Binding IsCreated}"/>
                         </ViewCell>
                         <ViewCell>

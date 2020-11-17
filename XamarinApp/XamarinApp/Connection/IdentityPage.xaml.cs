@@ -166,6 +166,9 @@ namespace XamarinApp.Connection
 			this.OnPropertyChanged("Region");
 			this.OnPropertyChanged("Country");
 			this.OnPropertyChanged("IsApproved");
+
+			if (Identity.State != IdentityState.Created)
+				this.ButtonSection.Remove(this.InviteReviewerCell);
 		}
 
 		public bool BackClicked()
