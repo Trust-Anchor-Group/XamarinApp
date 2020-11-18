@@ -322,5 +322,18 @@ namespace XamarinApp
 			else
 				return Code;
 		}
+
+		/// <summary>
+		/// Converts the name to a country code (if found). If not found, returns the original name.
+		/// </summary>
+		/// <param name="Name">Country name.</param>
+		/// <returns>Country code, or if not found, the original name.</returns>
+		public static string ToCode(string Name)
+		{
+			if (TryGetCode(Name, out string Code))
+				return Code;
+			else
+				return Name;
+		}
 	}
 }

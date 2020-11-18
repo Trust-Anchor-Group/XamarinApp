@@ -25,6 +25,9 @@ namespace XamarinApp.Connection
 			this.xmppConfiguration = XmppConfiguration;
 			this.BindingContext = this;
 			InitializeComponent();
+
+			foreach (string Country in ISO_3166_1.Countries)
+				this.CountryPicker.Items.Add(Country);
 		}
 
 		private async void BackButton_Clicked(object sender, EventArgs e)
@@ -92,10 +95,10 @@ namespace XamarinApp.Connection
 
 		private void Region_Completed(object sender, EventArgs e)
 		{
-			this.CountryEntry.Focus();
+			this.CountryPicker.Focus();
 		}
 
-		private void Country_Completed(object sender, EventArgs e)
+		private void Country_Selected(object sender, EventArgs e)
 		{
 			this.RegisterButton.Focus();
 		}
@@ -116,7 +119,7 @@ namespace XamarinApp.Connection
 			this.AreaEntry.IsEnabled = NotWorking;
 			this.CityEntry.IsEnabled = NotWorking;
 			this.RegionEntry.IsEnabled = NotWorking;
-			this.CountryEntry.IsEnabled = NotWorking;
+			this.CountryPicker.IsEnabled = NotWorking;
 			this.Connecting.IsVisible = Working;
 			this.Connecting.IsRunning = Working;
 		}
@@ -195,8 +198,8 @@ namespace XamarinApp.Connection
 				if (!string.IsNullOrEmpty(s = this.RegionEntry.Text?.Trim()))
 					Properties.Add(new Property("REGION", s));
 
-				if (!string.IsNullOrEmpty(s = this.CountryEntry.Text?.Trim()))
-					Properties.Add(new Property("COUNTRY", s));
+				if (!string.IsNullOrEmpty(s = this.CountryPicker.SelectedItem?.ToString()))
+					Properties.Add(new Property("COUNTRY", ISO_3166_1.ToCode(s)));
 
 				if (!string.IsNullOrEmpty(s = this.DeviceID?.Trim()))
 					Properties.Add(new Property("DEVICE_ID", s));

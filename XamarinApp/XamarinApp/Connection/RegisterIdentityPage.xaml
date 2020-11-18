@@ -28,7 +28,7 @@
             <Label Text="Region or State:" />
             <Entry x:Name="RegionEntry" Text="{Binding Region}" Completed="Region_Completed"/>
             <Label Text="Country:" />
-            <Entry x:Name="CountryEntry" Text="{Binding Country}" Completed="Country_Completed"/>
+            <Picker x:Name="CountryPicker" SelectedItem="{Binding Country}" SelectedIndexChanged="Country_Selected"/>
             <Label Text="Device ID:" />
             <Entry x:Name="DeviceIDEntry" Text="{Binding DeviceID}" IsReadOnly="True"/>
             <Button x:Name="AddPhoto" Text="Add Photo" Clicked="AddPhotoButton_Clicked" IsEnabled="{Binding CanTakePhoto}"/>
