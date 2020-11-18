@@ -118,7 +118,8 @@ namespace XamarinApp.Connection
 		public string Area => this.xmppConfiguration.LegalIdentity["AREA"];
 		public string City => this.xmppConfiguration.LegalIdentity["CITY"];
 		public string Region => this.xmppConfiguration.LegalIdentity["REGION"];
-		public string Country => this.xmppConfiguration.LegalIdentity["COUNTRY"];
+		public string CountryCode => this.xmppConfiguration.LegalIdentity["COUNTRY"];
+		public string Country => ISO_3166_1.ToName(this.CountryCode);
 		public bool IsApproved => this.xmppConfiguration.LegalIdentity.State == IdentityState.Approved;
 		public bool IsCreated => this.xmppConfiguration.LegalIdentity.State == IdentityState.Created;
 

@@ -127,7 +127,8 @@ namespace XamarinApp.MainMenu.Contracts
 		public string Area => this.requestorIdentity["AREA"];
 		public string City => this.requestorIdentity["CITY"];
 		public string Region => this.requestorIdentity["REGION"];
-		public string Country => this.requestorIdentity["COUNTRY"];
+		public string CountryCode => this.requestorIdentity["COUNTRY"];
+		public string Country => ISO_3166_1.ToName(this.CountryCode);
 		public bool IsApproved => this.requestorIdentity.State == IdentityState.Approved;
 		public string Purpose => this.purpose;
 

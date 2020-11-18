@@ -252,7 +252,8 @@ namespace XamarinApp.Connection
 		public string Area => this.xmppConfiguration.LegalIdentity?["AREA"] ?? string.Empty;
 		public string City => this.xmppConfiguration.LegalIdentity?["CITY"] ?? string.Empty;
 		public string Region => this.xmppConfiguration.LegalIdentity?["REGION"] ?? string.Empty;
-		public string Country => this.xmppConfiguration.LegalIdentity?["COUNTRY"] ?? string.Empty;
+		public string CountryCode => this.xmppConfiguration.LegalIdentity?["COUNTRY"] ?? string.Empty;
+		public string Country => ISO_3166_1.ToName(this.CountryCode);
 
 		public string DeviceID
 		{

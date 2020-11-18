@@ -81,7 +81,7 @@ namespace XamarinApp.MainMenu
 		public bool ForReviewArea => this.ForReview && !string.IsNullOrEmpty(this.Area);
 		public bool ForReviewCity => this.ForReview && !string.IsNullOrEmpty(this.City);
 		public bool ForReviewRegion => this.ForReview && !string.IsNullOrEmpty(this.Region);
-		public bool ForReviewCountry => this.ForReview && !string.IsNullOrEmpty(this.Country);
+		public bool ForReviewCountry => this.ForReview && !string.IsNullOrEmpty(this.CountryCode);
 		public bool NotForReview => (this.review is null);
 		public bool IsPersonal => this.personal;
 		public bool NotPersonal => !this.personal;
@@ -164,7 +164,8 @@ namespace XamarinApp.MainMenu
 		public string Area => this.identity["AREA"];
 		public string City => this.identity["CITY"];
 		public string Region => this.identity["REGION"];
-		public string Country => this.identity["COUNTRY"];
+		public string CountryCode => this.identity["COUNTRY"];
+		public string Country => ISO_3166_1.ToName(this.CountryCode);
 		public bool IsApproved => this.identity.State == IdentityState.Approved;
 
 		private static DateTime? CheckMin(DateTime? TP)
@@ -271,7 +272,7 @@ namespace XamarinApp.MainMenu
 					(!string.IsNullOrEmpty(this.Area) && !this.AreaCheck.IsChecked) ||
 					(!string.IsNullOrEmpty(this.City) && !this.CityCheck.IsChecked) ||
 					(!string.IsNullOrEmpty(this.Region) && !this.RegionCheck.IsChecked) ||
-					(!string.IsNullOrEmpty(this.Country) && !this.CountryCheck.IsChecked))
+					(!string.IsNullOrEmpty(this.CountryCode) && !this.CountryCheck.IsChecked))
 				{
 					App.DisplayMessage("Incomplete", "Please review all information above, and check the corresponding check boxes if the information is correct. This must be done before you can approve the information.");
 					return;

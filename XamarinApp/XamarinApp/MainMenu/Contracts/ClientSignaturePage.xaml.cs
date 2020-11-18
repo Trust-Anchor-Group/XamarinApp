@@ -44,7 +44,8 @@ namespace XamarinApp.MainMenu.Contracts
 		public string Area => this.identity["AREA"];
 		public string City => this.identity["CITY"];
 		public string Region => this.identity["REGION"];
-		public string Country => this.identity["COUNTRY"];
+		public string CountryCode => this.identity["COUNTRY"];
+		public string Country => ISO_3166_1.ToName(this.CountryCode);
 		public bool IsApproved => this.identity.State == IdentityState.Approved;
 
 		public string Role => this.clientSignature.Role;
