@@ -5,6 +5,7 @@ using System.IO;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
 using Xamarin.Forms;
+using XamarinApp.PersonalNumbers;
 using Waher.IoTGateway.Setup;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Networking.XMPP.HttpFileUpload;
@@ -146,10 +147,33 @@ namespace XamarinApp.Connection
 				return;
 			}
 
-			if (string.IsNullOrEmpty(this.PNrEntry.Text.Trim()))
+			if (string.IsNullOrEmpty(this.CountryPicker.SelectedItem?.ToString()))
+			{
+				this.CountryPicker.Focus();
+				App.DisplayMessage("Error", "You must choose a country.");
+				return;
+			}
+
+			string PNr = this.PNrEntry.Text.Trim();
+			if (string.IsNullOrEmpty(PNr))
 			{
 				this.PNrEntry.Focus();
 				App.DisplayMessage("Error", "You need to provide a personal or social security number.");
+				return;
+			}
+
+			string CountryCode = ISO_3166_1.ToCode(this.CountryPicker.SelectedItem.ToString());
+			bool? PNrValid = PersonalNumberSchemes.IsValid(CountryCode, PNr, out string PNrFormat);
+
+			if (PNrValid.HasValue && !PNrValid.Value)
+			{
+				this.PNrEntry.Focus();
+
+				if (string.IsNullOrEmpty(PNrFormat))
+					App.DisplayMessage("Error", "The personal number does not match national personal number regulations.");
+				else
+					App.DisplayMessage("Error", "The personal number does not match national personal number regulations. Expected format: " + PNrFormat);
+
 				return;
 			}
 
@@ -177,8 +201,7 @@ namespace XamarinApp.Connection
 				if (!string.IsNullOrEmpty(s = this.LastNamesEntry.Text?.Trim()))
 					Properties.Add(new Property("LAST", s));
 
-				if (!string.IsNullOrEmpty(s = this.PNrEntry.Text?.Trim()))
-					Properties.Add(new Property("PNR", s));
+				Properties.Add(new Property("PNR", PNr));
 
 				if (!string.IsNullOrEmpty(s = this.AddressEntry.Text?.Trim()))
 					Properties.Add(new Property("ADDR", s));
@@ -198,14 +221,13 @@ namespace XamarinApp.Connection
 				if (!string.IsNullOrEmpty(s = this.RegionEntry.Text?.Trim()))
 					Properties.Add(new Property("REGION", s));
 
-				if (!string.IsNullOrEmpty(s = this.CountryPicker.SelectedItem?.ToString()))
-					Properties.Add(new Property("COUNTRY", ISO_3166_1.ToCode(s)));
+				Properties.Add(new Property("COUNTRY", CountryCode));
 
 				if (!string.IsNullOrEmpty(s = this.DeviceID?.Trim()))
 					Properties.Add(new Property("DEVICE_ID", s));
 
 				Properties.Add(new Property("JID", App.Xmpp.BareJID));
-				
+
 				LegalIdentity Identity = await App.Contracts.ApplyAsync(Properties.ToArray());
 
 				foreach ((string, string, byte[]) P in this.photos.Values)
