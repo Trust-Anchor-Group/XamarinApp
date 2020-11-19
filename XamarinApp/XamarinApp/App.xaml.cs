@@ -23,6 +23,7 @@ using Waher.Security;
 using XamarinApp.Connection;
 using XamarinApp.MainMenu;
 using XamarinApp.MainMenu.Contracts;
+using XamarinApp.PersonalNumbers;
 using System.Collections.Generic;
 using System.Xml;
 
@@ -129,6 +130,8 @@ namespace XamarinApp
 				configuration = new XmppConfiguration();
 				await Database.Insert(configuration);
 			}
+
+			PersonalNumberSchemes.Load();
 
 			await ShowPage();
 		}
