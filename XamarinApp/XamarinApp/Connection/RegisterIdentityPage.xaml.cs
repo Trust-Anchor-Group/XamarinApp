@@ -163,7 +163,8 @@ namespace XamarinApp.Connection
 			}
 
 			string CountryCode = ISO_3166_1.ToCode(this.CountryPicker.SelectedItem.ToString());
-			bool? PNrValid = PersonalNumberSchemes.IsValid(CountryCode, PNr, out string PNrFormat);
+			string PNr0 = PNr;
+			bool? PNrValid = PersonalNumberSchemes.IsValid(CountryCode, ref PNr, out string PNrFormat);
 
 			if (PNrValid.HasValue && !PNrValid.Value)
 			{
@@ -176,6 +177,8 @@ namespace XamarinApp.Connection
 
 				return;
 			}
+			else if (PNr != PNr0)
+				this.PNrEntry.Text = PNr;
 
 			this.IsWorking(true);
 

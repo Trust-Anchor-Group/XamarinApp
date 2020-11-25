@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Waher.Script;
 
 namespace XamarinApp.PersonalNumbers
@@ -12,17 +13,7 @@ namespace XamarinApp.PersonalNumbers
 		private readonly string displayString;
 		private readonly Expression pattern;
 		private readonly Expression check;
-
-		/// <summary>
-		/// Checks personal numbers against a personal number scheme.
-		/// </summary>
-		/// <param name="VariableName">Name of variable to use in script for the personal number.</param>
-		/// <param name="DisplayString">A string that can be displayed to a user, informing the user about the approximate format expected.</param>
-		/// <param name="Pattern">Expression checking if the scheme applies to a personal number.</param>
-		public PersonalNumberScheme(string VariableName, string DisplayString, Expression Pattern)
-			: this(VariableName, DisplayString, Pattern, null)
-		{
-		}
+		private readonly Expression normalize;
 
 		/// <summary>
 		/// Checks personal numbers against a personal number scheme.
@@ -31,12 +22,14 @@ namespace XamarinApp.PersonalNumbers
 		/// <param name="DisplayString">A string that can be displayed to a user, informing the user about the approximate format expected.</param>
 		/// <param name="Pattern">Expression checking if the scheme applies to a personal number.</param>
 		/// <param name="Check">Optional expression, checking if the contents of the personal number is valid.</param>
-		public PersonalNumberScheme(string VariableName, string DisplayString, Expression Pattern, Expression Check)
+		/// <param name="Normalize">Optional normalization expression.</param>
+		public PersonalNumberScheme(string VariableName, string DisplayString, Expression Pattern, Expression Check, Expression Normalize)
 		{
 			this.variableName = VariableName;
 			this.displayString = DisplayString;
 			this.pattern = Pattern;
 			this.check = Check;
+			this.normalize = Normalize;
 		}
 
 		/// <summary>
@@ -49,11 +42,11 @@ namespace XamarinApp.PersonalNumbers
 		/// </summary>
 		/// <param name="PersonalNumber">String representation of the personal number.</param>
 		/// <returns>
-		/// true = valid
+		/// true = valid: <paramref name="PersonalNumber"/> may be normalized.
 		/// false = invalid
 		/// null = scheme not applicable
 		/// </returns>
-		public bool? IsValid(string PersonalNumber)
+		public bool? IsValid(ref string PersonalNumber)
 		{
 			try
 			{
@@ -68,10 +61,22 @@ namespace XamarinApp.PersonalNumbers
 					if (!(this.check is null))
 					{
 						Result = this.check.Evaluate(Variables);
-						return Result is bool b2 && b2;
+
+						if (!(Result is bool b2) || !b2)
+							return false;
 					}
-					else
-						return true;
+
+					if (!(this.normalize is null))
+					{
+						Result = this.normalize.Evaluate(Variables);
+
+						if (!(Result is string Normalized))
+							return false;
+
+						PersonalNumber = Normalized;
+					}
+
+					return true;
 				}
 				else
 					return null;

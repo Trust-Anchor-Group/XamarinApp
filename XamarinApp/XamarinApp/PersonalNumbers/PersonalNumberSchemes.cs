@@ -22,7 +22,7 @@ namespace XamarinApp.PersonalNumbers
 				XmlDocument Doc = new XmlDocument();
 
 				using (MemoryStream ms = new MemoryStream(Waher.Content.Resources.LoadResource(
-					typeof(PersonalNumberSchemes).Namespace + ".PersonalNumbersSchemes.xml")))
+					typeof(PersonalNumberSchemes).Namespace + ".PersonalNumberSchemes.xml")))
 				{
 					Doc.Load(ms);
 				}
@@ -36,6 +36,7 @@ namespace XamarinApp.PersonalNumbers
 						string Variable = null;
 						Expression Pattern = null;
 						Expression Check = null;
+						Expression Normalize = null;
 
 						try
 						{
@@ -52,6 +53,10 @@ namespace XamarinApp.PersonalNumbers
 
 										case "Check":
 											Check = new Expression(E2.InnerText);
+											break;
+
+										case "Normalize":
+											Normalize = new Expression(E2.InnerText);
 											break;
 									}
 								}
@@ -72,7 +77,7 @@ namespace XamarinApp.PersonalNumbers
 							schemesByCode[Country] = Schemes;
 						}
 
-						Schemes.AddLast(new PersonalNumberScheme(Variable, DisplayString, Pattern, Check));
+						Schemes.AddLast(new PersonalNumberScheme(Variable, DisplayString, Pattern, Check, Normalize));
 					}
 				}
 			}
@@ -92,9 +97,9 @@ namespace XamarinApp.PersonalNumbers
 		/// false = invalid
 		/// null = no registered schemes for country.
 		/// </returns>
-		public static bool? IsValid(string CountryCode, string PersonalNumber)
+		public static bool? IsValid(string CountryCode, ref string PersonalNumber)
 		{
-			return IsValid(CountryCode, PersonalNumber, out string _);
+			return IsValid(CountryCode, ref PersonalNumber, out string _);
 		}
 
 		/// <summary>
@@ -104,11 +109,11 @@ namespace XamarinApp.PersonalNumbers
 		/// <param name="PersonalNumber">Personal Number</param>
 		/// <param name="DisplayString">A string that can be displayed to a user, informing the user about the approximate format expected.</param>
 		/// <returns>
-		/// true = valid
+		/// true = valid: <paramref name="PersonalNumber"/> may be normalized.
 		/// false = invalid
 		/// null = no registered schemes for country.
 		/// </returns>
-		public static bool? IsValid(string CountryCode, string PersonalNumber, out string DisplayString)
+		public static bool? IsValid(string CountryCode, ref string PersonalNumber, out string DisplayString)
 		{
 			DisplayString = string.Empty;
 
@@ -119,7 +124,7 @@ namespace XamarinApp.PersonalNumbers
 					if (string.IsNullOrEmpty(DisplayString))
 						DisplayString = Scheme.DisplayString;
 
-					bool? Valid = Scheme.IsValid(PersonalNumber);
+					bool? Valid = Scheme.IsValid(ref PersonalNumber);
 					if (Valid.HasValue)
 						return Valid;
 				}
