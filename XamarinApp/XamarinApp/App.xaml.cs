@@ -19,6 +19,8 @@ using Waher.Persistence.Files;
 using Waher.Persistence.Serialization;
 using Waher.Runtime.Inventory;
 using Waher.Runtime.Queue;
+using Waher.Script;
+using Waher.Script.Graphs;
 using Waher.Security;
 using XamarinApp.Connection;
 using XamarinApp.MainMenu;
@@ -104,6 +106,8 @@ namespace XamarinApp
 				typeof(ObjectSerializer).Assembly,
 				typeof(XmppClient).Assembly,
 				typeof(ContractsClient).Assembly,
+				typeof(Expression).Assembly,
+				typeof(Graph).Assembly,
 				typeof(Waher.Things.ThingReference).Assembly,
 				typeof(Waher.Runtime.Settings.RuntimeSettings).Assembly,
 				typeof(Waher.Runtime.Language.Language).Assembly,
