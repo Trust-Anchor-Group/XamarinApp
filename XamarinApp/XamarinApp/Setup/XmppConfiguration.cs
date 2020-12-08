@@ -20,6 +20,7 @@ namespace Waher.IoTGateway.Setup
         private string registryJid = string.Empty;
         private string provisioningJid = string.Empty;
         private string httpFileUploadJid = string.Empty;
+        private string logJid = string.Empty;
         private string pinHash = string.Empty;
         private long? httpFileUploadMaxSize = null;
         private int step = 0;
@@ -100,6 +101,13 @@ namespace Waher.IoTGateway.Setup
         {
             get => this.httpFileUploadMaxSize;
             set => this.httpFileUploadMaxSize = value;
+        }
+
+        [DefaultValueStringEmpty]
+        public string LogJid
+        {
+            get => this.logJid;
+            set => this.logJid = value;
         }
 
         public string Pin

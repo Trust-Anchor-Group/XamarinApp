@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Waher.Events;
+using Waher.Events.XMPP;
 using Waher.IoTGateway.Setup;
 using Waher.Networking.Sniffers;
 using Waher.Networking.XMPP;
@@ -41,6 +42,9 @@ namespace XamarinApp
 		private static XmppClient xmpp = null;
 		private static ContractsClient contracts = null;
 		private static HttpFileUploadClient fileUpload = null;
+#if DEBUG
+		private static XmppEventSink xmppEventSink = null;
+#endif
 		private static XmppConfiguration configuration = null;
 		private static string domainName = null;
 		private static string accountName = null;
@@ -70,6 +74,15 @@ namespace XamarinApp
 			fileUpload?.Dispose();
 			fileUpload = null;
 
+#if DEBUG
+			if (!(xmppEventSink is null))
+			{
+				Log.Unregister(xmppEventSink);
+
+				xmppEventSink.Dispose();
+				xmppEventSink = null;
+			}
+#endif
 			xmpp?.Dispose();
 			xmpp = null;
 		}
@@ -432,14 +445,18 @@ namespace XamarinApp
 
 							minuteTimer = new Timer(MinuteTick, null, 60000, 60000);
 
-
 							if (string.IsNullOrEmpty(configuration.LegalJid) ||
 								string.IsNullOrEmpty(configuration.RegistryJid) ||
 								string.IsNullOrEmpty(configuration.ProvisioningJid) ||
-								string.IsNullOrEmpty(configuration.HttpFileUploadJid))
+								string.IsNullOrEmpty(configuration.HttpFileUploadJid) ||
+								string.IsNullOrEmpty(configuration.LogJid))
 							{
 								Task _ = FindServices(xmpp);
 							}
+
+							Log.Informational("App connected.", string.Empty, xmpp.BareJID, "AppConnected", EventLevel.Minor,
+								new KeyValuePair<string, object>("Name", typeof(App).Namespace),
+								new KeyValuePair<string, object>("Version", typeof(App).Assembly.ImageRuntimeVersion));
 							break;
 
 						case XmppState.Error:
@@ -462,6 +479,7 @@ namespace XamarinApp
 
 				await AddLegalService(configuration.LegalJid);
 				AddFileUploadService(configuration.HttpFileUploadJid, configuration.HttpFileUploadMaxSize);
+				AddLogService(configuration.LogJid);
 			}
 		}
 
@@ -469,7 +487,8 @@ namespace XamarinApp
 		{
 			if (string.IsNullOrEmpty(configuration.LegalJid) ||
 				string.IsNullOrEmpty(configuration.HttpFileUploadJid) ||
-				!configuration.HttpFileUploadMaxSize.HasValue)
+				!configuration.HttpFileUploadMaxSize.HasValue ||
+				string.IsNullOrEmpty(configuration.LogJid))
 			{
 				TaskCompletionSource<bool> Done = new TaskCompletionSource<bool>();
 
@@ -559,6 +578,15 @@ namespace XamarinApp
 						Changed = true;
 					}
 				}
+
+				if (e3.HasFeature(XmppEventSink.NamespaceEventLogging))
+				{
+					if (configuration.LogJid != Item.JID)
+					{
+						configuration.LogJid = Item.JID;
+						Changed = true;
+					}
+				}
 			}
 
 			if (Changed)
@@ -573,6 +601,11 @@ namespace XamarinApp
 
 			if (!string.IsNullOrEmpty(configuration.HttpFileUploadJid) && configuration.HttpFileUploadMaxSize.HasValue)
 				App.AddFileUploadService(configuration.HttpFileUploadJid, configuration.HttpFileUploadMaxSize);
+			else
+				Result = false;
+
+			if (!string.IsNullOrEmpty(configuration.LogJid))
+				App.AddLogService(configuration.LogJid);
 			else
 				Result = false;
 
@@ -649,6 +682,17 @@ namespace XamarinApp
 		{
 			if (!string.IsNullOrEmpty(JID) && MaxFileSize.HasValue && !(xmpp is null))
 				fileUpload = new HttpFileUploadClient(xmpp, JID, MaxFileSize);
+		}
+
+		internal static void AddLogService(string JID)
+		{
+#if DEBUG
+			if (!string.IsNullOrEmpty(JID) && !(xmpp is null))
+			{
+				xmppEventSink = new XmppEventSink("XMPP Event Sink", xmpp, JID, false);
+				Log.Register(xmppEventSink);
+			}
+#endif
 		}
 
 		private static Task Contracts_PetitionedContractResponseReceived(object Sender, ContractPetitionResponseEventArgs e)
