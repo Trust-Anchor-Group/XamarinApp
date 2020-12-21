@@ -13,6 +13,7 @@ using Waher.Networking.Sniffers;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Networking.XMPP.HttpFileUpload;
+using Waher.Networking.XMPP.MUC;
 using Waher.Networking.XMPP.Provisioning;
 using Waher.Networking.XMPP.ServiceDiscovery;
 using Waher.Persistence;
@@ -42,6 +43,7 @@ namespace XamarinApp
 		private static XmppClient xmpp = null;
 		private static ContractsClient contracts = null;
 		private static HttpFileUploadClient fileUpload = null;
+		private static MultiUserChatClient muc = null;
 #if DEBUG
 		private static XmppEventSink xmppEventSink = null;
 #endif
@@ -449,6 +451,7 @@ namespace XamarinApp
 								string.IsNullOrEmpty(configuration.RegistryJid) ||
 								string.IsNullOrEmpty(configuration.ProvisioningJid) ||
 								string.IsNullOrEmpty(configuration.HttpFileUploadJid) ||
+								string.IsNullOrEmpty(configuration.MucJid) ||
 								string.IsNullOrEmpty(configuration.LogJid))
 							{
 								Task _ = FindServices(xmpp);
@@ -479,6 +482,7 @@ namespace XamarinApp
 
 				await AddLegalService(configuration.LegalJid);
 				AddFileUploadService(configuration.HttpFileUploadJid, configuration.HttpFileUploadMaxSize);
+				AddMucService(configuration.MucJid);
 				AddLogService(configuration.LogJid);
 			}
 		}
@@ -488,7 +492,8 @@ namespace XamarinApp
 			if (string.IsNullOrEmpty(configuration.LegalJid) ||
 				string.IsNullOrEmpty(configuration.HttpFileUploadJid) ||
 				!configuration.HttpFileUploadMaxSize.HasValue ||
-				string.IsNullOrEmpty(configuration.LogJid))
+				string.IsNullOrEmpty(configuration.LogJid) ||
+				string.IsNullOrEmpty(configuration.MucJid))
 			{
 				TaskCompletionSource<bool> Done = new TaskCompletionSource<bool>();
 
@@ -587,6 +592,15 @@ namespace XamarinApp
 						Changed = true;
 					}
 				}
+
+				if (e3.HasFeature(MultiUserChatClient.NamespaceMuc))
+				{
+					if (configuration.MucJid != Item.JID)
+					{
+						configuration.MucJid = Item.JID;
+						Changed = true;
+					}
+				}
 			}
 
 			if (Changed)
@@ -601,6 +615,11 @@ namespace XamarinApp
 
 			if (!string.IsNullOrEmpty(configuration.HttpFileUploadJid) && configuration.HttpFileUploadMaxSize.HasValue)
 				App.AddFileUploadService(configuration.HttpFileUploadJid, configuration.HttpFileUploadMaxSize);
+			else
+				Result = false;
+
+			if (!string.IsNullOrEmpty(configuration.MucJid))
+				App.AddMucService(configuration.MucJid);
 			else
 				Result = false;
 
@@ -682,6 +701,12 @@ namespace XamarinApp
 		{
 			if (!string.IsNullOrEmpty(JID) && MaxFileSize.HasValue && !(xmpp is null))
 				fileUpload = new HttpFileUploadClient(xmpp, JID, MaxFileSize);
+		}
+
+		internal static void AddMucService(string JID)
+		{
+			if (!string.IsNullOrEmpty(JID) && !(xmpp is null))
+				muc = new MultiUserChatClient(xmpp, JID);
 		}
 
 		internal static void AddLogService(string JID)
