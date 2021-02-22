@@ -44,7 +44,7 @@ namespace XamarinApp.Connection
 
 						try
 						{
-							KeyValuePair<string, TemporaryFile> P = await App.Contracts.GetAttachmentAsync(Attachment.Url, 10000);
+							KeyValuePair<string, TemporaryFile> P = await App.Contracts.GetAttachmentAsync(Attachment.Url, SignWith.CurrentKeys, 10000);
 
 							using (TemporaryFile File = P.Value)
 							{

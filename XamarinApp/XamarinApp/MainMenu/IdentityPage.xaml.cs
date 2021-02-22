@@ -103,7 +103,7 @@ namespace XamarinApp.MainMenu
 
 						try
 						{
-							KeyValuePair<string, TemporaryFile> P = await App.Contracts.GetAttachmentAsync(Attachment.Url, 10000);
+							KeyValuePair<string, TemporaryFile> P = await App.Contracts.GetAttachmentAsync(Attachment.Url, SignWith.CurrentKeys, 10000);
 
 							using (TemporaryFile File = P.Value)
 							{
@@ -296,7 +296,7 @@ namespace XamarinApp.MainMenu
 					return;
 				}
 
-				byte[] Signature = await App.Contracts.SignAsync(this.review.ContentToSign);
+				byte[] Signature = await App.Contracts.SignAsync(this.review.ContentToSign, SignWith.LatestApprovedId);
 
 				await App.Contracts.PetitionSignatureResponseAsync(this.review.SignatoryIdentityId, this.review.ContentToSign, 
 					Signature, this.review.PetitionId, this.review.RequestorFullJid, true);

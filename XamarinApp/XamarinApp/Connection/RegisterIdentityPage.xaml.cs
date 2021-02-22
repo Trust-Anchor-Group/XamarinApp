@@ -244,7 +244,7 @@ namespace XamarinApp.Connection
 
 					await e2.PUT(P.Item3, P.Item2, 30000);
 
-					byte[] Signature = await App.Contracts.SignAsync(P.Item3);
+					byte[] Signature = await App.Contracts.SignAsync(P.Item3, SignWith.CurrentKeys);
 
 					Identity = await App.Contracts.AddLegalIdAttachmentAsync(Identity.Id, e2.GetUrl, Signature);
 				}
