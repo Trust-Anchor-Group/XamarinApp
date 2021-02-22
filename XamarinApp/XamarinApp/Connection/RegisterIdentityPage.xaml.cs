@@ -231,6 +231,8 @@ namespace XamarinApp.Connection
 
 				Properties.Add(new Property("JID", App.Xmpp.BareJID));
 
+				await App.Contracts.GenerateNewKeys();
+
 				LegalIdentity Identity = await App.Contracts.ApplyAsync(Properties.ToArray());
 
 				foreach ((string, string, byte[]) P in this.photos.Values)
