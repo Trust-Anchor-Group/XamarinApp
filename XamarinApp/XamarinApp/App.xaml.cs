@@ -635,7 +635,9 @@ namespace XamarinApp
 		{
 			if (!string.IsNullOrEmpty(JID) && !(xmpp is null))
 			{
-				contracts = await ContractsClient.Create(xmpp, JID);
+				contracts = new ContractsClient(xmpp, JID);
+				await contracts.LoadKeys(true);
+
 				contracts.IdentityUpdated += Contracts_IdentityUpdated;
 
 				contracts.PetitionForIdentityReceived += Contracts_PetitionForIdentityReceived;

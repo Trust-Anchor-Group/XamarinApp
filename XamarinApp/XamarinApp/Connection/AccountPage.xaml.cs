@@ -230,7 +230,7 @@ namespace XamarinApp.Connection
 							if (!string.IsNullOrEmpty(this.xmppConfiguration.LegalJid) ||
 								await App.FindServices(Client))
 							{
-								using (ContractsClient Contracts = await ContractsClient.Create(Client, this.xmppConfiguration.LegalJid))
+								using (ContractsClient Contracts = new ContractsClient(Client, this.xmppConfiguration.LegalJid))	// Keys not required for the GetLegalIdentitiesAsync call
 								{
 									foreach (LegalIdentity Identity in await Contracts.GetLegalIdentitiesAsync())
 									{
