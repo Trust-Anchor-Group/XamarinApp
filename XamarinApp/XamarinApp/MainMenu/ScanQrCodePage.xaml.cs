@@ -3,7 +3,6 @@ using System.ComponentModel;
 using Waher.Events;
 using Xamarin.Essentials;
 using Xamarin.Forms;
-using Xamarin.Forms.Markup;
 using ZXing;
 
 namespace XamarinApp.MainMenu
