@@ -91,7 +91,7 @@ namespace XamarinApp.PersonalNumbers
 		/// <summary>
 		/// Checks if a personal number is valid, in accordance with registered personal number schemes.
 		/// </summary>
-		/// <param name="Country">ISO 3166-1 Country Codes.</param>
+		/// <param name="CountryCode">ISO 3166-1 Country Codes.</param>
 		/// <param name="PersonalNumber">Personal Number</param>
 		/// <param name="DisplayString">A string that can be displayed to a user, informing the user about the approximate format expected.</param>
 		/// <returns>Validation information about the number.</returns>
