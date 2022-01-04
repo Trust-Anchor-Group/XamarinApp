@@ -165,6 +165,7 @@ namespace XamarinApp.Connection
 			string CountryCode = ISO_3166_1.ToCode(this.CountryPicker.SelectedItem.ToString());
 			string PNr0 = PNr;
 			NumberInformation PNrInfo = await PersonalNumberSchemes.Validate(CountryCode, PNr);
+			PNr = PNrInfo.PersonalNumber;
 
 			if (PNrInfo.IsValid.HasValue && !PNrInfo.IsValid.Value)
 			{
