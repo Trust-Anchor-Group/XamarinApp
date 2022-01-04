@@ -164,16 +164,16 @@ namespace XamarinApp.Connection
 
 			string CountryCode = ISO_3166_1.ToCode(this.CountryPicker.SelectedItem.ToString());
 			string PNr0 = PNr;
-			bool? PNrValid = PersonalNumberSchemes.IsValid(CountryCode, ref PNr, out string PNrFormat);
+			NumberInformation PNrInfo = await PersonalNumberSchemes.Validate(CountryCode, PNr);
 
-			if (PNrValid.HasValue && !PNrValid.Value)
+			if (PNrInfo.IsValid.HasValue && !PNrInfo.IsValid.Value)
 			{
 				this.PNrEntry.Focus();
 
-				if (string.IsNullOrEmpty(PNrFormat))
+				if (string.IsNullOrEmpty(PNrInfo.DisplayString))
 					App.DisplayMessage("Error", "The personal number does not match national personal number regulations.");
 				else
-					App.DisplayMessage("Error", "The personal number does not match national personal number regulations. Expected format: " + PNrFormat);
+					App.DisplayMessage("Error", "The personal number does not match national personal number regulations. Expected format: " + PNrInfo.DisplayString);
 
 				return;
 			}

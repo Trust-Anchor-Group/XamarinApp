@@ -110,7 +110,7 @@ namespace XamarinApp.MainMenu.Contracts
 			{
 				foreach (Role Role in Contract.Roles)
 				{
-					string Html = Role.ToHTML(Contract.DefaultLanguage, Contract);
+					string Html = Role.ToHTML(Contract.DefaultLanguage, Contract).Result;
 					Html = Waher.Content.Html.HtmlDocument.GetBody(Html);
 
 					AddTag(this.Roles, Role.Name, Html + CountString(Role.MinCount, Role.MaxCount), true, string.Empty, null);
@@ -144,7 +144,7 @@ namespace XamarinApp.MainMenu.Contracts
 
 			// Human-readable text
 
-			string Xaml = Contract.ToXamarinForms(Contract.DefaultLanguage);
+			string Xaml = Contract.ToXamarinForms(Contract.DefaultLanguage).Result;
 			StackLayout HumanReadable = new StackLayout().LoadFromXaml(Xaml);
 
 			List<View> Children = new List<View>();

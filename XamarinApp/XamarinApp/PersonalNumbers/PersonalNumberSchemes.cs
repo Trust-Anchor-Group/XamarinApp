@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Xml;
 using Waher.Content.Xml;
 using Waher.Events;
@@ -92,47 +93,38 @@ namespace XamarinApp.PersonalNumbers
 		/// </summary>
 		/// <param name="Country">ISO 3166-1 Country Codes.</param>
 		/// <param name="PersonalNumber">Personal Number</param>
-		/// <returns>
-		/// true = valid
-		/// false = invalid
-		/// null = no registered schemes for country.
-		/// </returns>
-		public static bool? IsValid(string CountryCode, ref string PersonalNumber)
-		{
-			return IsValid(CountryCode, ref PersonalNumber, out string _);
-		}
-
-		/// <summary>
-		/// Checks if a personal number is valid, in accordance with registered personal number schemes.
-		/// </summary>
-		/// <param name="Country">ISO 3166-1 Country Codes.</param>
-		/// <param name="PersonalNumber">Personal Number</param>
 		/// <param name="DisplayString">A string that can be displayed to a user, informing the user about the approximate format expected.</param>
-		/// <returns>
-		/// true = valid: <paramref name="PersonalNumber"/> may be normalized.
-		/// false = invalid
-		/// null = no registered schemes for country.
-		/// </returns>
-		public static bool? IsValid(string CountryCode, ref string PersonalNumber, out string DisplayString)
+		/// <returns>Validation information about the number.</returns>
+		public static async Task<NumberInformation> Validate(string CountryCode, string PersonalNumber)
 		{
-			DisplayString = string.Empty;
-
 			if (schemesByCode.TryGetValue(CountryCode, out LinkedList<PersonalNumberScheme> Schemes))
 			{
 				foreach (PersonalNumberScheme Scheme in Schemes)
 				{
-					if (string.IsNullOrEmpty(DisplayString))
-						DisplayString = Scheme.DisplayString;
-
-					bool? Valid = Scheme.IsValid(ref PersonalNumber);
-					if (Valid.HasValue)
-						return Valid;
+					NumberInformation Info = await Scheme.Validate(PersonalNumber);
+					if (Info.IsValid.HasValue)
+					{
+						Info.DisplayString = Scheme.DisplayString;
+						return Info;
+					}
 				}
 
-				return false;
+				return new NumberInformation()
+				{
+					PersonalNumber = PersonalNumber,
+					DisplayString = string.Empty,
+					IsValid = false
+				};
 			}
 			else
-				return null;
+			{
+				return new NumberInformation()
+				{
+					PersonalNumber = PersonalNumber,
+					DisplayString = string.Empty,
+					IsValid = null
+				};
+			}
 		}
 	}
 }

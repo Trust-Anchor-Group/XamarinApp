@@ -4,6 +4,8 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Waher.IoTGateway.Setup;
 using Waher.Networking.XMPP.Contracts;
+using System.Threading.Tasks;
+using Waher.Events;
 
 namespace XamarinApp.MainMenu.Contracts
 {
@@ -102,7 +104,7 @@ namespace XamarinApp.MainMenu.Contracts
 						IdsPerType.TryGetValue(value, out string TemplateId))
 					{
 						this.templateId = TemplateId;
-						this.LoadTemplate();
+						this.LoadTemplate().Wait();
 					}
 				}
 			}
@@ -235,7 +237,7 @@ namespace XamarinApp.MainMenu.Contracts
 			set => this.visibility = value;
 		}
 
-		private async void LoadTemplate()
+		private async Task LoadTemplate()
 		{
 			try
 			{
@@ -249,85 +251,92 @@ namespace XamarinApp.MainMenu.Contracts
 			}
 		}
 
-		private void PopulateTemplateForm()
+		private async void PopulateTemplateForm()
 		{
-			Contract Contract = this.template;
-			if (Contract is null)
-				return;
-
-			this.PopulateHumanReadableText();
-
-			this.Parameters.Children.Clear();
-			this.Roles.Children.Clear();
-
-			this.RolePicker.Items.Clear();
-			this.RolePicker.IsEnabled = Contract.Roles.Length > 0;
-			this.VisibilityPicker.IsEnabled = true;
-
-			foreach (Role Role in Contract.Roles)
+			try
 			{
-				this.RolePicker.Items.Add(Role.Name);
+				Contract Contract = this.template;
+				if (Contract is null)
+					return;
 
-				this.Roles.Children.Add(new Label()
+				await this.PopulateHumanReadableText();
+
+				this.Parameters.Children.Clear();
+				this.Roles.Children.Clear();
+
+				this.RolePicker.Items.Clear();
+				this.RolePicker.IsEnabled = Contract.Roles.Length > 0;
+				this.VisibilityPicker.IsEnabled = true;
+
+				foreach (Role Role in Contract.Roles)
 				{
-					Text = Role.Name,
+					this.RolePicker.Items.Add(Role.Name);
+
+					this.Roles.Children.Add(new Label()
+					{
+						Text = Role.Name,
+						FontSize = 18,
+						TextColor = Color.Navy,
+						LineBreakMode = LineBreakMode.NoWrap,
+						StyleId = Role.Name
+					});
+
+					Populate(this.Roles, await Role.ToXamarinForms(Contract.DefaultLanguage, Contract));
+
+					if (Role.MinCount > 0)
+					{
+						Button Button = new Button()
+						{
+							Text = "Add Part",
+							StyleId = Role.Name
+						};
+
+						Button.Clicked += AddPartButton_Clicked;
+
+						this.Roles.Children.Add(Button);
+					}
+				}
+
+				this.Parameters.Children.Add(new Label()
+				{
+					Text = "Parameters",
 					FontSize = 18,
 					TextColor = Color.Navy,
-					LineBreakMode = LineBreakMode.NoWrap,
-					StyleId = Role.Name
+					LineBreakMode = LineBreakMode.WordWrap
 				});
 
-				Populate(this.Roles, Role.ToXamarinForms(Contract.DefaultLanguage, Contract));
+				Entry Entry;
 
-				if (Role.MinCount > 0)
+				foreach (Parameter Parameter in Contract.Parameters)
 				{
-					Button Button = new Button()
+					Populate(Parameters, await Parameter.ToXamarinForms(Contract.DefaultLanguage, Contract));
+
+					Parameters.Children.Add(Entry = new Entry()
 					{
-						Text = "Add Part",
-						StyleId = Role.Name
-					};
+						StyleId = Parameter.Name,
+						Text = FilterDefaultValues(Parameter.ObjectValue?.ToString()),
+						HorizontalOptions = LayoutOptions.FillAndExpand,
+					});
 
-					Button.Clicked += AddPartButton_Clicked;
-
-					this.Roles.Children.Add(Button);
+					Entry.TextChanged += Entry_TextChanged;
 				}
-			}
 
-			this.Parameters.Children.Add(new Label()
-			{
-				Text = "Parameters",
-				FontSize = 18,
-				TextColor = Color.Navy,
-				LineBreakMode = LineBreakMode.WordWrap
-			});
-
-			Entry Entry;
-
-			foreach (Parameter Parameter in Contract.Parameters)
-			{
-				Populate(Parameters, Parameter.ToXamarinForms(Contract.DefaultLanguage, Contract));
-
-				Parameters.Children.Add(Entry = new Entry()
+				if (this.xmppConfiguration.UsePin)
 				{
-					StyleId = Parameter.Name,
-					Text = FilterDefaultValues(Parameter.ObjectValue?.ToString()),
-					HorizontalOptions = LayoutOptions.FillAndExpand,
-				});
+					this.PinLabel.IsVisible = true;
+					this.PIN.IsVisible = true;
+				}
 
-				Entry.TextChanged += Entry_TextChanged;
+				this.ProposeButton.IsEnabled = true;
+
+				// Contract.ArchiveOptional;
+				// Contract.ArchiveRequired;
+				// Contract.Duration;
 			}
-
-			if (this.xmppConfiguration.UsePin)
+			catch (Exception ex)
 			{
-				this.PinLabel.IsVisible = true;
-				this.PIN.IsVisible = true;
+				Log.Critical(ex);
 			}
-
-			this.ProposeButton.IsEnabled = true;
-
-			// Contract.ArchiveOptional;
-			// Contract.ArchiveRequired;
-			// Contract.Duration;
 		}
 
 		private void AddPartButton_Clicked(object sender, EventArgs e)
@@ -336,42 +345,49 @@ namespace XamarinApp.MainMenu.Contracts
 				App.ShowPage(new AddPartPage(this, (Id) => this.AddRole(Button.StyleId, Id)), false);
 		}
 
-		private void PopulateHumanReadableText()
+		private async Task PopulateHumanReadableText()
 		{
 			this.HumanReadableText.Children.Clear();
 
 			if (!(this.template is null))
-				Populate(this.HumanReadableText, this.template.ToXamarinForms(this.template.DefaultLanguage));
+				Populate(this.HumanReadableText, await this.template.ToXamarinForms(this.template.DefaultLanguage));
 		}
 
-		private void Entry_TextChanged(object sender, TextChangedEventArgs e)
+		private async void Entry_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			if (sender is Entry Entry)
+			try
 			{
-				foreach (Parameter P in this.template.Parameters)
+				if (sender is Entry Entry)
 				{
-					if (P.Name == Entry.StyleId)
+					foreach (Parameter P in this.template.Parameters)
 					{
-						if (P is StringParameter SP)
-							SP.Value = e.NewTextValue;
-						else if (P is NumericalParameter NP)
+						if (P.Name == Entry.StyleId)
 						{
-							if (double.TryParse(e.NewTextValue, out double d))
+							if (P is StringParameter SP)
+								SP.Value = e.NewTextValue;
+							else if (P is NumericalParameter NP)
 							{
-								NP.Value = d;
-								Entry.BackgroundColor = Color.Default;
+								if (double.TryParse(e.NewTextValue, out double d))
+								{
+									NP.Value = d;
+									Entry.BackgroundColor = Color.Default;
+								}
+								else
+								{
+									Entry.BackgroundColor = Color.Salmon;
+									return;
+								}
 							}
-							else
-							{
-								Entry.BackgroundColor = Color.Salmon;
-								return;
-							}
-						}
 
-						PopulateHumanReadableText();
-						break;
+							await PopulateHumanReadableText();
+							break;
+						}
 					}
 				}
+			}
+			catch (Exception ex)
+			{
+				Log.Critical(ex);
 			}
 		}
 

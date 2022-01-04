@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 using Waher.Script;
 
 namespace XamarinApp.PersonalNumbers
@@ -40,50 +41,62 @@ namespace XamarinApp.PersonalNumbers
 		/// <summary>
 		/// Checks if a personal number is valid according to the personal number scheme.
 		/// </summary>
-		/// <param name="PersonalNumber">String representation of the personal number.</param>
-		/// <returns>
-		/// true = valid: <paramref name="PersonalNumber"/> may be normalized.
-		/// false = invalid
-		/// null = scheme not applicable
-		/// </returns>
-		public bool? IsValid(ref string PersonalNumber)
+		/// <returns>Validation information about the number.</returns>
+		public async Task<NumberInformation> Validate(string PersonalNumber)
 		{
+			NumberInformation Info = new NumberInformation()
+			{
+				PersonalNumber = PersonalNumber,
+				DisplayString = string.Empty
+			};
+
 			try
 			{
 				Variables Variables = new Variables(new Variable(this.variableName, PersonalNumber));
-				object Result = this.pattern.Evaluate(Variables);
+				object EvalResult = await this.pattern.EvaluateAsync(Variables);
 
-				if (Result is bool b)
+				if (EvalResult is bool b)
 				{
 					if (!b)
 						return null;
 
 					if (!(this.check is null))
 					{
-						Result = this.check.Evaluate(Variables);
+						EvalResult = await this.check.EvaluateAsync(Variables);
 
-						if (!(Result is bool b2) || !b2)
-							return false;
+						if (!(EvalResult is bool b2) || !b2)
+						{
+							Info.IsValid = false;
+							return Info;
+						}
 					}
 
 					if (!(this.normalize is null))
 					{
-						Result = this.normalize.Evaluate(Variables);
+						EvalResult = await this.normalize.EvaluateAsync(Variables);
 
-						if (!(Result is string Normalized))
-							return false;
+						if (!(EvalResult is string Normalized))
+						{
+							Info.IsValid = false;
+							return Info;
+						}
 
-						PersonalNumber = Normalized;
+						Info.PersonalNumber = Normalized;
 					}
 
-					return true;
+					Info.IsValid = true;
+					return Info;
 				}
 				else
-					return null;
+				{
+					Info.IsValid = null;
+					return Info;
+				}
 			}
 			catch (Exception)
 			{
-				return false;
+				Info.IsValid = false;
+				return Info;
 			}
 		}
 	}
