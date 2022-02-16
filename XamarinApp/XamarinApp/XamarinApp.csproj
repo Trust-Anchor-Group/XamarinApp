@@ -38,7 +38,7 @@
     <PackageReference Include="Waher.Networking.XMPP" Version="2.0.1" />
     <PackageReference Include="Waher.Networking.XMPP.Avatar" Version="2.0.1" />
     <PackageReference Include="Waher.Networking.XMPP.Concentrator" Version="2.0.1" />
-    <PackageReference Include="Waher.Networking.XMPP.Contracts" Version="2.0.1" />
+    <PackageReference Include="Waher.Networking.XMPP.Contracts" Version="2.1.0" />
     <PackageReference Include="Waher.Networking.XMPP.Control" Version="2.0.1" />
     <PackageReference Include="Waher.Networking.XMPP.MUC" Version="2.0.1" />
     <PackageReference Include="Waher.Networking.XMPP.P2P" Version="2.0.0" />
@@ -61,8 +61,8 @@
     <PackageReference Include="Waher.Security.EllipticCurves" Version="1.0.9" />
     <PackageReference Include="Waher.Things" Version="1.1.5" />
     <PackageReference Include="Xam.Plugin.Media" Version="5.0.1" />
-    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2291" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2337" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
     <PackageReference Include="ZXing.Net.Mobile" Version="2.4.1" />
     <PackageReference Include="ZXing.Net.Mobile.Forms" Version="2.4.1" />
   </ItemGroup>

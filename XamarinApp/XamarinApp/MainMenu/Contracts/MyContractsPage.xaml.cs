@@ -38,9 +38,9 @@ namespace XamarinApp.MainMenu.Contracts
 				string[] ContractIds;
 
 				if (this.createdContracts)
-					ContractIds = await App.Contracts.GetCreatedContractsAsync();
+					ContractIds = await App.Contracts.GetCreatedContractReferencesAsync();
 				else
-					ContractIds = await App.Contracts.GetSignedContractsAsync();
+					ContractIds = await App.Contracts.GetSignedContractReferencesAsync();
 
 				TapGestureRecognizer TapGestureRecognizer = new TapGestureRecognizer();
 				TapGestureRecognizer.Tapped += (sender, e) =>
